@@ -2,24 +2,26 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
+require('./models/Usuario');
+
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-// Middlewares globales
 app.use(cors());
 app.use(express.json());
 
-// Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ mensaje: 'API Fiado Digital funcionando correctamente 🚀' });
 });
 
+app.use('/auth', authRoutes);
+
 const PORT = process.env.PORT || 5000;
 
-// Probar conexión a la base de datos y levantar el servidor
-sequelize.authenticate()
+sequelize.sync()
   .then(() => {
-    console.log('✅ Conexión a PostgreSQL exitosa');
+    console.log('✅ Conexión a PostgreSQL exitosa y modelos sincronizados');
     app.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     });
