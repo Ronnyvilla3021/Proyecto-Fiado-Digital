@@ -1,0 +1,26 @@
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+const enviarEmail = async ({ to, subject, html }) => {
+  try {
+    await transporter.sendMail({
+      from: `"Fiado Digital" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+    console.log(`📧 Email enviado a ${to}`);
+  } catch (error) {
+    console.error('❌ Error al enviar email:', error);
+    throw error;
+  }
+};
+
+module.exports = enviarEmail;
