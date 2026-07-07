@@ -3,14 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 require('./models/Usuario');
-require('./models/Usuario');
 require('./models/Cliente');
+require('./models/associations');
 
 const authRoutes = require('./routes/authRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
+const ventaRoutes = require('./routes/ventaRoutes');
 
 const app = express();
-
 
 app.use(cors());
 app.use(express.json());
@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/clientes', clienteRoutes);
+app.use('/ventas', ventaRoutes);
 
 const PORT = process.env.PORT || 5000;
 
