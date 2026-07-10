@@ -1,11 +1,12 @@
-const { Venta, DetalleVenta, Cliente } = require('../models/associations');
+const { Venta, DetalleVenta, Cliente, Credito } = require('../models/associations');
 const sequelize = require('../config/database');
+const { Op } = require('sequelize');
 
 // REGISTRAR VENTA
 const registrarVenta = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { cliente_id, metodo_pago, observaciones, detalles } = req.body;
+    const { cliente_id, metodo_pago, observaciones, detalles, dias_plazo } = req.body;
 
     if (!metodo_pago || !['contado', 'fiado'].includes(metodo_pago)) {
       await t.rollback();
@@ -17,7 +18,6 @@ const registrarVenta = async (req, res) => {
       return res.status(400).json({ error: 'Debes incluir al menos un ítem en la venta' });
     }
 
-    // Calcular el total sumando los detalles (nunca confiar en un total enviado desde el frontend)
     let total = 0;
     for (const item of detalles) {
       if (!item.descripcion || !item.cantidad || !item.precio_unitario) {
@@ -29,7 +29,6 @@ const registrarVenta = async (req, res) => {
 
     let cliente = null;
 
-    // Si es venta fiada, el cliente es obligatorio y se valida el crédito disponible
     if (metodo_pago === 'fiado') {
       if (!cliente_id) {
         await t.rollback();
@@ -42,15 +41,30 @@ const registrarVenta = async (req, res) => {
         return res.status(404).json({ error: 'Cliente no encontrado o inactivo' });
       }
 
-      if (Number(total) > Number(cliente.limite_credito)) {
+      // Sumar el saldo de todos los créditos NO pagados de este cliente
+      const creditosPendientes = await Credito.findAll({
+        where: {
+          cliente_id: cliente.id,
+          estado: { [Op.ne]: 'pagado' },
+        },
+        transaction: t,
+      });
+
+      const deudaActual = creditosPendientes.reduce(
+        (suma, c) => suma + Number(c.saldo),
+        0
+      );
+
+      const creditoDisponible = Number(cliente.limite_credito) - deudaActual;
+
+      if (Number(total) > creditoDisponible) {
         await t.rollback();
         return res.status(403).json({
-          error: `El total (${total}) supera el límite de crédito disponible del cliente (${cliente.limite_credito})`,
+          error: `El total (${total}) supera el crédito disponible del cliente. Límite: ${cliente.limite_credito}, deuda actual: ${deudaActual.toFixed(2)}, disponible: ${creditoDisponible.toFixed(2)}`,
         });
       }
     }
 
-    // Crear la venta
     const nuevaVenta = await Venta.create({
       cliente_id: cliente_id || null,
       usuario_id: req.usuario.id,
@@ -59,7 +73,6 @@ const registrarVenta = async (req, res) => {
       observaciones,
     }, { transaction: t });
 
-    // Crear los detalles asociados
     const detallesCreados = await Promise.all(
       detalles.map((item) =>
         DetalleVenta.create({
@@ -72,12 +85,30 @@ const registrarVenta = async (req, res) => {
       )
     );
 
+    // Si la venta es fiada, se crea automáticamente el crédito asociado
+    let creditoCreado = null;
+    if (metodo_pago === 'fiado') {
+      const plazo = dias_plazo && Number(dias_plazo) > 0 ? Number(dias_plazo) : 15; // 15 días por defecto
+      const fechaLimite = new Date();
+      fechaLimite.setDate(fechaLimite.getDate() + plazo);
+
+      creditoCreado = await Credito.create({
+        venta_id: nuevaVenta.id,
+        cliente_id: cliente.id,
+        monto_total: total,
+        saldo: total,
+        fecha_limite: fechaLimite,
+        estado: 'pendiente',
+      }, { transaction: t });
+    }
+
     await t.commit();
 
     res.status(201).json({
       mensaje: 'Venta registrada correctamente',
       venta: nuevaVenta,
       detalles: detallesCreados,
+      credito: creditoCreado,
     });
   } catch (error) {
     await t.rollback();
@@ -86,7 +117,7 @@ const registrarVenta = async (req, res) => {
   }
 };
 
-// LISTAR VENTAS (con filtros opcionales)
+// LISTAR VENTAS
 const listarVentas = async (req, res) => {
   try {
     const { cliente_id, metodo_pago } = req.query;
@@ -111,7 +142,7 @@ const listarVentas = async (req, res) => {
   }
 };
 
-// OBTENER UNA VENTA POR ID
+// OBTENER UNA VENTA
 const obtenerVenta = async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const sequelize = require('./config/database');
 require('./models/Usuario');
 require('./models/Cliente');
@@ -9,6 +10,7 @@ require('./models/associations');
 const authRoutes = require('./routes/authRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
+const creditoRoutes = require('./routes/creditoRoutes');
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/clientes', clienteRoutes);
 app.use('/ventas', ventaRoutes);
+app.use('/creditos', creditoRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 
