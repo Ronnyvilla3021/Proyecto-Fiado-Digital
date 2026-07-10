@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const dashboardRoutes = require('./routes/dashboardRoutes');
+const http = require('http');
+const { Server } = require('socket.io');
 const sequelize = require('./config/database');
 require('./models/Usuario');
 require('./models/Cliente');
@@ -11,8 +12,23 @@ const authRoutes = require('./routes/authRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
 const creditoRoutes = require('./routes/creditoRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
+const server = http.createServer(app); // servidor HTTP crudo, para que Socket.io se pueda "montar" sobre él
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+  },
+});
+
+// Middleware para que los controladores puedan acceder a "io" y emitir eventos
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 app.use(cors());
 app.use(express.json());
@@ -27,12 +43,20 @@ app.use('/ventas', ventaRoutes);
 app.use('/creditos', creditoRoutes);
 app.use('/dashboard', dashboardRoutes);
 
+io.on('connection', (socket) => {
+  console.log(`🔌 Cliente conectado por socket: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Cliente desconectado: ${socket.id}`);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 sequelize.sync()
   .then(() => {
     console.log('✅ Conexión a PostgreSQL exitosa y modelos sincronizados');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => { // ojo: ahora escuchamos con "server", no con "app"
       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     });
   })

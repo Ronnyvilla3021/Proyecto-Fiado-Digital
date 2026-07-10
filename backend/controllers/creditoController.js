@@ -127,6 +127,11 @@ const registrarPago = async (req, res) => {
 
     await t.commit();
 
+    req.io.emit('nuevo-pago', {
+      pago: nuevoPago,
+      credito: credito,
+    });
+
     res.status(201).json({
       mensaje: 'Pago registrado correctamente',
       pago: nuevoPago,

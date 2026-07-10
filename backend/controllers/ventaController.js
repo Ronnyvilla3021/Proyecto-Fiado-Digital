@@ -102,7 +102,13 @@ const registrarVenta = async (req, res) => {
       }, { transaction: t });
     }
 
-    await t.commit();
+await t.commit();
+
+    // Emitir evento en tiempo real para que el dashboard se actualice solo
+    req.io.emit('nueva-venta', {
+      venta: nuevaVenta,
+      metodo_pago: nuevaVenta.metodo_pago,
+    });
 
     res.status(201).json({
       mensaje: 'Venta registrada correctamente',
@@ -115,6 +121,9 @@ const registrarVenta = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Error al registrar la venta' });
   }
+
+  
+
 };
 
 // LISTAR VENTAS
