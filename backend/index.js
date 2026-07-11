@@ -15,6 +15,7 @@ const ventaRoutes = require('./routes/ventaRoutes');
 const creditoRoutes = require('./routes/creditoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const iniciarCronJobs = require('./jobs/scheduler');
+const reporteRoutes = require('./routes/reporteRoutes');
 
 const app = express();
 const server = http.createServer(app); // servidor HTTP crudo, para que Socket.io se pueda "montar" sobre él
@@ -45,6 +46,7 @@ app.use('/ventas', ventaRoutes);
 app.use('/creditos', creditoRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/notificaciones', notificacionRoutes);
+app.use('/reportes', reporteRoutes);
 
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado por socket: ${socket.id}`);
