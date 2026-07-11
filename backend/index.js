@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const notificacionRoutes = require('./routes/notificacionRoutes');
 const { Server } = require('socket.io');
 const sequelize = require('./config/database');
 require('./models/Usuario');
@@ -13,6 +14,7 @@ const clienteRoutes = require('./routes/clienteRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
 const creditoRoutes = require('./routes/creditoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const iniciarCronJobs = require('./jobs/scheduler');
 
 const app = express();
 const server = http.createServer(app); // servidor HTTP crudo, para que Socket.io se pueda "montar" sobre él
@@ -42,6 +44,7 @@ app.use('/clientes', clienteRoutes);
 app.use('/ventas', ventaRoutes);
 app.use('/creditos', creditoRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/notificaciones', notificacionRoutes);
 
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado por socket: ${socket.id}`);
@@ -56,9 +59,10 @@ const PORT = process.env.PORT || 5000;
 sequelize.sync()
   .then(() => {
     console.log('✅ Conexión a PostgreSQL exitosa y modelos sincronizados');
-    server.listen(PORT, () => { // ojo: ahora escuchamos con "server", no con "app"
+    server.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     });
+    iniciarCronJobs(io);
   })
   .catch((error) => {
     console.error('❌ Error al conectar a la base de datos:', error);
