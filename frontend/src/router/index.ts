@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
+import AppLayout from '../components/AppLayout.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,32 +13,39 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
+      component: AppLayout,
       meta: { publica: false },
-    },
-    {
-      path: '/clientes',
-      name: 'clientes',
-      component: () => import('../views/ClientesView.vue'),
-      meta: { publica: false },
-    },
-    {
-      path: '/ventas',
-      name: 'ventas',
-      component: () => import('../views/VentasView.vue'),
-      meta: { publica: false },
-    },
-    {
-      path: '/creditos',
-      name: 'creditos',
-      component: () => import('../views/CreditosView.vue'),
-      meta: { publica: false },
+      children: [
+        {
+          path: '',
+          name: 'dashboard',
+          component: () => import('../views/DashboardView.vue'),
+        },
+        {
+  path: 'reportes',
+  name: 'reportes',
+  component: () => import('../views/ReportesView.vue'),
+},
+        {
+          path: 'clientes',
+          name: 'clientes',
+          component: () => import('../views/ClientesView.vue'),
+        },
+        {
+          path: 'ventas',
+          name: 'ventas',
+          component: () => import('../views/VentasView.vue'),
+        },
+        {
+          path: 'creditos',
+          name: 'creditos',
+          component: () => import('../views/CreditosView.vue'),
+        },
+      ],
     },
   ],
 });
 
-// Guard global: bloquea rutas privadas si no hay sesión iniciada
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
   const rutaPublica = to.meta.publica === true;
