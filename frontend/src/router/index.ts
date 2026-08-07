@@ -53,6 +53,11 @@ const router = createRouter({
           name: 'creditos',
           component: () => import('../views/CreditosView.vue'),
         },
+        {
+  path: 'auditoria',
+  name: 'auditoria',
+  component: () => import('../views/AuditoriaView.vue'),
+},
       ],
     },
   ],

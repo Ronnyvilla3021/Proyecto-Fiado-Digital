@@ -27,6 +27,13 @@
         >
           <span>📄</span> Reportes
         </RouterLink>
+        <RouterLink
+  v-if="authStore.esAdmin()"
+  to="/auditoria"
+  class="sidebar__link"
+>
+  <span>📋</span> Auditoría
+</RouterLink>
       </nav>
     </aside>
 
