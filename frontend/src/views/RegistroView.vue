@@ -1,10 +1,21 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <h1 class="login-card__titulo">Fiado Digital</h1>
-      <p class="login-card__subtitulo">Inicia sesión para continuar</p>
+      <h1 class="login-card__titulo">Crear cuenta</h1>
+      <p class="login-card__subtitulo">Regístrate en Fiado Digital</p>
 
-      <form class="login-form" @submit.prevent="manejarLogin">
+      <form v-if="!registroExitoso" class="login-form" @submit.prevent="manejarRegistro">
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input
+            id="nombre"
+            v-model="nombre"
+            type="text"
+            placeholder="Tu nombre"
+            required
+          />
+        </div>
+
         <div class="campo">
           <label for="email">Correo electrónico</label>
           <input
@@ -22,7 +33,19 @@
             id="password"
             v-model="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Mínimo 6 caracteres"
+            minlength="6"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="confirmar">Confirmar contraseña</label>
+          <input
+            id="confirmar"
+            v-model="confirmarPassword"
+            type="password"
+            placeholder="Repite tu contraseña"
             required
           />
         </div>
@@ -30,11 +53,17 @@
         <p v-if="errorMensaje" class="mensaje-error">{{ errorMensaje }}</p>
 
         <button type="submit" class="boton-primario" :disabled="cargando">
-          {{ cargando ? 'Ingresando...' : 'Iniciar sesión' }}
+          {{ cargando ? 'Creando cuenta...' : 'Registrarme' }}
         </button>
       </form>
+
+      <div v-else class="mensaje-exito">
+        <p>✅ ¡Cuenta creada correctamente!</p>
+        <p>Revisa tu correo <strong>{{ email }}</strong> y haz click en el enlace de verificación antes de iniciar sesión.</p>
+      </div>
+
       <p class="login-card__link">
-        ¿No tienes cuenta? <RouterLink to="/registro">Regístrate aquí</RouterLink>
+        <RouterLink to="/login">← Volver al inicio de sesión</RouterLink>
       </p>
     </div>
   </div>
@@ -42,28 +71,30 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { login } from '../services/authService';
-import { useAuthStore } from '../stores/authStore';
+import { registrar } from '../services/authService';
 
-const router = useRouter();
-const authStore = useAuthStore();
-
+const nombre = ref('');
 const email = ref('');
 const password = ref('');
+const confirmarPassword = ref('');
 const cargando = ref(false);
 const errorMensaje = ref('');
+const registroExitoso = ref(false);
 
-const manejarLogin = async () => {
+const manejarRegistro = async () => {
   errorMensaje.value = '';
-  cargando.value = true;
 
+  if (password.value !== confirmarPassword.value) {
+    errorMensaje.value = 'Las contraseñas no coinciden';
+    return;
+  }
+
+  cargando.value = true;
   try {
-    const respuesta = await login(email.value, password.value);
-    authStore.setSesion(respuesta.token, respuesta.usuario);
-    router.push({ name: 'dashboard' });
+    await registrar(nombre.value, email.value, password.value);
+    registroExitoso.value = true;
   } catch (error: any) {
-    errorMensaje.value = error.response?.data?.error || 'Error al iniciar sesión';
+    errorMensaje.value = error.response?.data?.error || 'Error al crear la cuenta';
   } finally {
     cargando.value = false;
   }
@@ -106,7 +137,6 @@ const manejarLogin = async () => {
     text-align: center;
     margin-top: 1.25rem;
     font-size: 0.85rem;
-    color: #6b7280;
 
     a {
       color: #4f46e5;
@@ -157,6 +187,19 @@ const manejarLogin = async () => {
   background: #fef2f2;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
+}
+
+.mensaje-exito {
+  text-align: center;
+  padding: 1rem 0;
+  line-height: 1.5;
+
+  p:first-child {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #16a34a;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .boton-primario {

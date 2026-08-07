@@ -11,6 +11,18 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
       meta: { publica: true },
     },
+{
+  path: '/registro',
+  name: 'registro',
+  component: () => import('../views/RegistroView.vue'),
+  meta: { publica: true },
+},
+{
+  path: '/verificar-email/:token',
+  name: 'verificar-email',
+  component: () => import('../views/VerificarEmailView.vue'),
+  meta: { publica: true },
+},
     {
       path: '/',
       component: AppLayout,
