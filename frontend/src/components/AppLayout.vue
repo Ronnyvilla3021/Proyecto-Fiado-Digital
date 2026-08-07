@@ -37,19 +37,21 @@
         <div class="header__espaciador"></div>
 
         <div class="header__acciones">
-          <button class="header__boton" @click="modoOscuro = !modoOscuro" title="Cambiar tema">
-            {{ modoOscuro ? '☀️' : '🌙' }}
-          </button>
+  <NotificacionesCampana />
 
-          <div class="header__usuario">
-            <span class="header__nombre">{{ authStore.usuario?.nombre }}</span>
-            <span class="header__rol">{{ authStore.usuario?.rol }}</span>
-          </div>
+  <button class="header__boton" @click="modoOscuro = !modoOscuro" title="Cambiar tema">
+    {{ modoOscuro ? '☀️' : '🌙' }}
+  </button>
 
-          <button class="header__boton" @click="salir" title="Cerrar sesión">
-            🚪
-          </button>
-        </div>
+  <div class="header__usuario">
+    <span class="header__nombre">{{ authStore.usuario?.nombre }}</span>
+    <span class="header__rol">{{ authStore.usuario?.rol }}</span>
+  </div>
+
+  <button class="header__boton" @click="salir" title="Cerrar sesión">
+    🚪
+  </button>
+</div>
       </header>
 
       <!-- Vista actual -->
@@ -64,6 +66,7 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
+import NotificacionesCampana from './NotificacionesCampana.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

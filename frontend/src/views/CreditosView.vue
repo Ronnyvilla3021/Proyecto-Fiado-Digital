@@ -101,8 +101,10 @@ import { ref, onMounted } from 'vue';
 import { useCreditoStore } from '../stores/creditoStore';
 import BaseModal from '../components/BaseModal.vue';
 import type { Credito } from '../types/Credito';
+import { useRoute } from 'vue-router';
 
 const creditoStore = useCreditoStore();
+const route = useRoute();
 
 const filtrosEstado = [
   { etiqueta: 'Todos', valor: '' },
@@ -119,7 +121,9 @@ const guardando = ref(false);
 const errorMensaje = ref('');
 
 onMounted(() => {
-  creditoStore.cargarCreditos();
+  const estadoInicial = (route.query.estado as string) || '';
+  filtroActivo.value = estadoInicial;
+  creditoStore.cargarCreditos(estadoInicial || undefined);
 });
 
 const cambiarFiltro = (valor: string) => {

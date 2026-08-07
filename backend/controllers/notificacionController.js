@@ -33,4 +33,22 @@ const marcarLeida = async (req, res) => {
   }
 };
 
-module.exports = { listarNotificaciones, marcarLeida };
+const eliminarNotificacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const noti = await Notificacion.findOne({ where: { id, usuario_id: req.usuario.id } });
+
+    if (!noti) {
+      return res.status(404).json({ error: 'Notificación no encontrada' });
+    }
+
+    await noti.destroy();
+
+    res.json({ mensaje: 'Notificación eliminada' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar notificación' });
+  }
+};
+
+module.exports = { listarNotificaciones, marcarLeida, eliminarNotificacion };

@@ -1,16 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { listarNotificaciones, marcarLeida } = require('../controllers/notificacionController');
+const { listarNotificaciones, marcarLeida, eliminarNotificacion } = require('../controllers/notificacionController');
 const { verificarToken, verificarRol } = require('../middlewares/authMiddleware');
 const avisarCobrosPendientes = require('../jobs/avisarCobrosPendientes');
 const avisarMora = require('../jobs/avisarMora');
 const resumenDiario = require('../jobs/resumenDiario');
+
 
 router.use(verificarToken);
 
 // Notificaciones internas del usuario autenticado
 router.get('/', listarNotificaciones);
 router.put('/:id/leer', marcarLeida);
+router.delete('/:id', eliminarNotificacion);
 
 // Ejecución manual de los jobs de automatización (solo administrador)
 router.post('/ejecutar/cobros-pendientes', verificarRol('administrador'), async (req, res) => {

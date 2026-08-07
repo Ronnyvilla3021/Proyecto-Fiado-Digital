@@ -18,7 +18,7 @@ const listarCreditos = async (req, res) => {
     const where = {};
 
     if (cliente_id) where.cliente_id = cliente_id;
-    if (estado) where.estado = estado;
+    // Ya no filtramos por "estado" aquí — se filtra después de calcular el estado real
 
     const creditos = await Credito.findAll({
       where,
@@ -29,8 +29,8 @@ const listarCreditos = async (req, res) => {
       order: [['fecha_limite', 'ASC']],
     });
 
-    // Agregamos dias_mora calculado dinámicamente y actualizamos estado si venció
-    const resultado = creditos.map((credito) => {
+    // Calculamos el estado real de cada crédito
+    let resultado = creditos.map((credito) => {
       const diasMora = calcularDiasMora(credito.fecha_limite, credito.estado);
       const estadoCalculado =
         credito.estado === 'pagado' ? 'pagado' : diasMora > 0 ? 'vencido' : 'pendiente';
@@ -41,6 +41,11 @@ const listarCreditos = async (req, res) => {
         estado: estadoCalculado,
       };
     });
+
+    // Ahora sí filtramos, sobre el estado YA calculado, no sobre el de la base de datos
+    if (estado) {
+      resultado = resultado.filter((c) => c.estado === estado);
+    }
 
     res.json(resultado);
   } catch (error) {
