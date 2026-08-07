@@ -1,5 +1,6 @@
 const Cliente = require('../models/Cliente');
 const { Op } = require('sequelize');
+const registrarAuditoria = require('../utils/auditoria');
 
 // CREAR CLIENTE
 const crearCliente = async (req, res) => {
@@ -33,6 +34,14 @@ const crearCliente = async (req, res) => {
       direccion,
       email,
       limite_credito: limiteFinal,
+    });
+
+    await registrarAuditoria({
+      usuario_id: req.usuario.id,
+      accion: 'crear',
+      entidad: 'cliente',
+      entidad_id: nuevoCliente.id,
+      descripcion: `Creó al cliente ${nuevoCliente.nombre} ${nuevoCliente.apellido}`,
     });
 
     res.status(201).json({ mensaje: 'Cliente creado correctamente', cliente: nuevoCliente });
@@ -115,7 +124,25 @@ const editarCliente = async (req, res) => {
     if (direccion !== undefined) cliente.direccion = direccion;
     if (email !== undefined) cliente.email = email;
 
+    // Guardamos qué cambió exactamente, antes de sobrescribir
+    const cambios = {};
+    if (limite_credito !== undefined && Number(limite_credito) !== Number(cliente._previousDataValues.limite_credito)) {
+      cambios.limite_credito = { antes: cliente._previousDataValues.limite_credito, despues: cliente.limite_credito };
+    }
+    if (estado !== undefined && estado !== cliente._previousDataValues.estado) {
+      cambios.estado = { antes: cliente._previousDataValues.estado, despues: cliente.estado };
+    }
+
     await cliente.save();
+
+    await registrarAuditoria({
+      usuario_id: req.usuario.id,
+      accion: 'editar',
+      entidad: 'cliente',
+      entidad_id: cliente.id,
+      descripcion: `Editó al cliente ${cliente.nombre} ${cliente.apellido}`,
+      detalles: Object.keys(cambios).length > 0 ? cambios : null,
+    });
 
     res.json({ mensaje: 'Cliente actualizado correctamente', cliente });
   } catch (error) {
@@ -136,6 +163,14 @@ const eliminarCliente = async (req, res) => {
 
     cliente.estado = 'inactivo';
     await cliente.save();
+
+    await registrarAuditoria({
+      usuario_id: req.usuario.id,
+      accion: 'desactivar',
+      entidad: 'cliente',
+      entidad_id: cliente.id,
+      descripcion: `Desactivó al cliente ${cliente.nombre} ${cliente.apellido}`,
+    });
 
     res.json({ mensaje: 'Cliente desactivado correctamente (soft delete)' });
   } catch (error) {

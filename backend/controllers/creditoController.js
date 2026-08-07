@@ -1,5 +1,6 @@
 const { Credito, Cliente, Pago, Venta } = require('../models/associations');
 const sequelize = require('../config/database');
+const registrarAuditoria = require('../utils/auditoria');
 
 // Función auxiliar: calcula los días de mora sin guardarlos en la BD
 const calcularDiasMora = (fechaLimite, estado) => {
@@ -131,6 +132,15 @@ const registrarPago = async (req, res) => {
     await credito.save({ transaction: t });
 
     await t.commit();
+
+    await registrarAuditoria({
+      usuario_id: req.usuario.id,
+      accion: 'pago',
+      entidad: 'credito',
+      entidad_id: credito.id,
+      descripcion: `Registró un pago de $${monto} sobre el crédito #${credito.id}`,
+      detalles: { monto_pagado: monto, saldo_restante: credito.saldo },
+    });
 
     req.io.emit('nuevo-pago', {
       pago: nuevoPago,

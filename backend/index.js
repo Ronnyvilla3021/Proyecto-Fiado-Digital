@@ -8,6 +8,7 @@ const sequelize = require('./config/database');
 require('./models/Usuario');
 require('./models/Cliente');
 require('./models/associations');
+require('./models/associations'); // esto ya carga Auditoria también, no necesitas un require aparte
 
 const authRoutes = require('./routes/authRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
@@ -16,6 +17,7 @@ const creditoRoutes = require('./routes/creditoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const iniciarCronJobs = require('./jobs/scheduler');
 const reporteRoutes = require('./routes/reporteRoutes');
+const auditoriaRoutes = require('./routes/auditoriaRoutes');
 
 const app = express();
 const server = http.createServer(app); // servidor HTTP crudo, para que Socket.io se pueda "montar" sobre él
@@ -47,6 +49,7 @@ app.use('/creditos', creditoRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/reportes', reporteRoutes);
+app.use('/auditoria', auditoriaRoutes);
 
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado por socket: ${socket.id}`);

@@ -1,6 +1,7 @@
 const { Venta, DetalleVenta, Cliente, Credito } = require('../models/associations');
 const sequelize = require('../config/database');
 const { Op } = require('sequelize');
+const registrarAuditoria = require('../utils/auditoria');
 
 // REGISTRAR VENTA
 const registrarVenta = async (req, res) => {
@@ -103,6 +104,14 @@ const registrarVenta = async (req, res) => {
     }
 
 await t.commit();
+
+    await registrarAuditoria({
+      usuario_id: req.usuario.id,
+      accion: 'crear',
+      entidad: 'venta',
+      entidad_id: nuevaVenta.id,
+      descripcion: `Registró una venta ${metodo_pago} por $${total}`,
+    });
 
     // Emitir evento en tiempo real para que el dashboard se actualice solo
     req.io.emit('nueva-venta', {

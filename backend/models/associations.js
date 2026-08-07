@@ -5,6 +5,7 @@ const DetalleVenta = require('./DetalleVenta');
 const Credito = require('./Credito');
 const Pago = require('./Pago');
 const Notificacion = require('./Notificacion');
+const Auditoria = require('./Auditoria');
 
 // Cliente - Venta
 Cliente.hasMany(Venta, { foreignKey: 'cliente_id' });
@@ -38,4 +39,8 @@ Pago.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 Usuario.hasMany(Notificacion, { foreignKey: 'usuario_id' });
 Notificacion.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
-module.exports = { Usuario, Cliente, Venta, DetalleVenta, Credito, Pago, Notificacion };
+// Usuario - Auditoria
+Usuario.hasMany(Auditoria, { foreignKey: 'usuario_id' });
+Auditoria.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+
+module.exports = { Usuario, Cliente, Venta, DetalleVenta, Credito, Pago, Notificacion, Auditoria };
