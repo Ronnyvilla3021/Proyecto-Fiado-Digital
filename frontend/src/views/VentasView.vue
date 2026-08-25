@@ -22,15 +22,21 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Fecha</th>
+            <th class="th-ordenable" @click="cambiarOrden('fecha')">
+              Fecha <span class="th-ordenable__icono">{{ iconoOrden('fecha') }}</span>
+            </th>
             <th>Cliente</th>
-            <th>Método</th>
-            <th>Total</th>
+            <th class="th-ordenable" @click="cambiarOrden('metodo_pago')">
+              Método <span class="th-ordenable__icono">{{ iconoOrden('metodo_pago') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('total')">
+              Total <span class="th-ordenable__icono">{{ iconoOrden('total') }}</span>
+            </th>
             <th>Ítems</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="venta in ventaStore.ventas" :key="venta.id">
+          <tr v-for="venta in datosPaginados" :key="venta.id">
             <td>{{ formatearFecha(venta.fecha) }}</td>
             <td>{{ venta.Cliente ? `${venta.Cliente.nombre} ${venta.Cliente.apellido}` : 'Consumidor final' }}</td>
             <td>
@@ -43,6 +49,12 @@
           </tr>
         </tbody>
       </table>
+
+      <PaginacionControles
+        :pagina-actual="paginaActual"
+        :total-paginas="totalPaginas"
+        @cambiar="irAPagina"
+      />
     </div>
 
     <!-- Modal Nueva Venta -->
@@ -164,9 +176,14 @@ import { useVentaStore } from '../stores/ventaStore';
 import { useClienteStore } from '../stores/clienteStore';
 import BaseModal from '../components/BaseModal.vue';
 import type { VentaFormulario } from '../types/Venta';
+import { useTablaAvanzada } from '../composables/useTablaAvanzada';
+import PaginacionControles from '../components/PaginacionControles.vue';
 
 const ventaStore = useVentaStore();
 const clienteStore = useClienteStore();
+
+const { paginaActual, totalPaginas, datosPaginados, cambiarOrden, irAPagina, iconoOrden } =
+  useTablaAvanzada(computed(() => ventaStore.ventas));
 
 const modalVisible = ref(false);
 const guardando = ref(false);
@@ -299,6 +316,77 @@ const guardarVenta = async () => {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+.table-wrapper {
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  }
+
+  th {
+    font-weight: 700;
+    color: var(--color-texto-secundario, #6b7280);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: rgba(108, 92, 231, 0.04);
+  }
+}
+
+.th-ordenable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: #6c5ce7;
+  }
+
+  &__icono {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-left: 0.15rem;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &--contado {
+    background: rgba(9, 132, 227, 0.12);
+    color: #0984e3;
+  }
+
+  &--fiado {
+    background: rgba(253, 203, 110, 0.25);
+    color: #e17055;
   }
 }
 

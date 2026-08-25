@@ -33,16 +33,26 @@
         <thead>
           <tr>
             <th>Cliente</th>
-            <th>Monto total</th>
-            <th>Saldo</th>
-            <th>Fecha límite</th>
-            <th>Estado</th>
-            <th>Mora</th>
+            <th class="th-ordenable" @click="cambiarOrden('monto_total')">
+              Monto total <span class="th-ordenable__icono">{{ iconoOrden('monto_total') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('saldo')">
+              Saldo <span class="th-ordenable__icono">{{ iconoOrden('saldo') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('fecha_limite')">
+              Fecha límite <span class="th-ordenable__icono">{{ iconoOrden('fecha_limite') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('estado')">
+              Estado <span class="th-ordenable__icono">{{ iconoOrden('estado') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('dias_mora')">
+              Mora <span class="th-ordenable__icono">{{ iconoOrden('dias_mora') }}</span>
+            </th>
             <th class="table__acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="credito in creditoStore.creditos" :key="credito.id">
+          <tr v-for="credito in datosPaginados" :key="credito.id">
             <td><strong>{{ credito.Cliente.nombre }} {{ credito.Cliente.apellido }}</strong></td>
             <td>${{ Number(credito.monto_total).toFixed(2) }}</td>
             <td class="table__saldo">${{ Number(credito.saldo).toFixed(2) }}</td>
@@ -70,6 +80,12 @@
           </tr>
         </tbody>
       </table>
+
+      <PaginacionControles
+        :pagina-actual="paginaActual"
+        :total-paginas="totalPaginas"
+        @cambiar="irAPagina"
+      />
     </div>
 
     <!-- Modal Registrar Pago -->
@@ -111,14 +127,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCreditoStore } from '../stores/creditoStore';
 import BaseModal from '../components/BaseModal.vue';
 import type { Credito } from '../types/Credito';
 import { useRoute } from 'vue-router';
+import { useTablaAvanzada } from '../composables/useTablaAvanzada';
+import PaginacionControles from '../components/PaginacionControles.vue';
 
 const creditoStore = useCreditoStore();
 const route = useRoute();
+
+const { paginaActual, totalPaginas, datosPaginados, cambiarOrden, irAPagina, iconoOrden } =
+  useTablaAvanzada(computed(() => creditoStore.creditos));
 
 const filtrosEstado = [
   { etiqueta: 'Todos', valor: '' },
@@ -270,6 +291,58 @@ const guardarPago = async () => {
   }
 }
 
+.table-wrapper {
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  }
+
+  th {
+    font-weight: 700;
+    color: var(--color-texto-secundario, #6b7280);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: rgba(108, 92, 231, 0.04);
+  }
+}
+
+.th-ordenable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: #6c5ce7;
+  }
+
+  &__icono {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-left: 0.15rem;
+  }
+}
+
 .table__saldo {
   font-weight: 700;
   color: #6c5ce7;
@@ -277,6 +350,30 @@ const guardarPago = async () => {
 
 .table__acciones {
   text-align: right;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &--pendiente {
+    background: rgba(253, 203, 110, 0.25);
+    color: #d68910;
+  }
+
+  &--vencido {
+    background: rgba(225, 112, 85, 0.12);
+    color: #e17055;
+  }
+
+  &--pagado {
+    background: rgba(0, 184, 148, 0.12);
+    color: #00b894;
+  }
 }
 
 .badge-mora {

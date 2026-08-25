@@ -35,17 +35,25 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Nombre</th>
-            <th>Cédula</th>
+            <th class="th-ordenable" @click="cambiarOrden('nombre')">
+              Nombre <span class="th-ordenable__icono">{{ iconoOrden('nombre') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('cedula')">
+              Cédula <span class="th-ordenable__icono">{{ iconoOrden('cedula') }}</span>
+            </th>
             <th>Teléfono</th>
-            <th>Límite crédito</th>
-            <th>Estado</th>
+            <th class="th-ordenable" @click="cambiarOrden('limite_credito')">
+              Límite crédito <span class="th-ordenable__icono">{{ iconoOrden('limite_credito') }}</span>
+            </th>
+            <th class="th-ordenable" @click="cambiarOrden('estado')">
+              Estado <span class="th-ordenable__icono">{{ iconoOrden('estado') }}</span>
+            </th>
             <th class="table__acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="cliente in clienteStore.clientes" :key="cliente.id">
-            <td><strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong></td>
+          <tr v-for="cliente in datosPaginados" :key="cliente.id">
+            <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
             <td>{{ cliente.cedula }}</td>
             <td>{{ cliente.telefono || '—' }}</td>
             <td>${{ Number(cliente.limite_credito).toFixed(2) }}</td>
@@ -76,6 +84,12 @@
           </tr>
         </tbody>
       </table>
+
+      <PaginacionControles
+        :pagina-actual="paginaActual"
+        :total-paginas="totalPaginas"
+        @cambiar="irAPagina"
+      />
     </div>
 
     <!-- Modal Crear/Editar -->
@@ -126,14 +140,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useClienteStore } from '../stores/clienteStore';
 import { useAuthStore } from '../stores/authStore';
 import BaseModal from '../components/BaseModal.vue';
 import type { Cliente, ClienteFormulario } from '../types/Cliente';
+import { useTablaAvanzada } from '../composables/useTablaAvanzada';
+import PaginacionControles from '../components/PaginacionControles.vue';
 
 const clienteStore = useClienteStore();
 const authStore = useAuthStore();
+
+const { paginaActual, totalPaginas, datosPaginados, cambiarOrden, irAPagina, iconoOrden } =
+  useTablaAvanzada(computed(() => clienteStore.clientes));
 
 const busqueda = ref('');
 const modalVisible = ref(false);
@@ -349,10 +368,81 @@ const reactivarCliente = async (cliente: Cliente) => {
   }
 }
 
+.table-wrapper {
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  }
+
+  th {
+    font-weight: 700;
+    color: var(--color-texto-secundario, #6b7280);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: rgba(108, 92, 231, 0.04);
+  }
+}
+
+.th-ordenable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: #6c5ce7;
+  }
+
+  &__icono {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-left: 0.15rem;
+  }
+}
+
 .table__acciones {
   display: flex;
   gap: 0.3rem;
   justify-content: flex-end;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &--activo {
+    background: rgba(0, 184, 148, 0.12);
+    color: #00b894;
+  }
+
+  &--inactivo {
+    background: rgba(225, 112, 85, 0.12);
+    color: #e17055;
+  }
 }
 
 .btn-icon {
