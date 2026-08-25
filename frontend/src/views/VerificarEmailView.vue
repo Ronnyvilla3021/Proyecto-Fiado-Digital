@@ -1,20 +1,25 @@
 <template>
-  <div class="login-page">
-    <div class="login-card">
+  <div class="verificar-page">
+    <div class="verificar-card">
       <div v-if="verificando" class="mensaje-estado">
-        <p>Verificando tu cuenta...</p>
+        <span class="mensaje-estado__icono">⏳</span>
+        <h3>Verificando tu cuenta...</h3>
+        <p>Por favor espera un momento</p>
+        <div class="spinner"></div>
       </div>
 
       <div v-else-if="exito" class="mensaje-exito">
-        <p>✅ ¡Cuenta verificada correctamente!</p>
-        <p>Ya puedes iniciar sesión.</p>
-        <RouterLink to="/login" class="boton-primario boton-link">Ir al login</RouterLink>
+        <span class="mensaje-exito__icono">✅</span>
+        <h3>¡Cuenta verificada correctamente!</h3>
+        <p>Ya puedes iniciar sesión y comenzar a usar Fiado Digital.</p>
+        <RouterLink to="/login" class="btn btn-primary">Ir al login</RouterLink>
       </div>
 
       <div v-else class="mensaje-error-caja">
-        <p>❌ No pudimos verificar tu cuenta</p>
+        <span class="mensaje-error-caja__icono">❌</span>
+        <h3>No pudimos verificar tu cuenta</h3>
         <p>{{ errorMensaje }}</p>
-        <RouterLink to="/login" class="boton-primario boton-link">Volver al login</RouterLink>
+        <RouterLink to="/login" class="btn btn-outline">Volver al login</RouterLink>
       </div>
     </div>
   </div>
@@ -44,57 +49,101 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.login-page {
+.verificar-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f4f6f8;
+  background: linear-gradient(135deg, #f0f2f6 0%, #e8ecf1 100%);
+  padding: 1rem;
 }
 
-.login-card {
-  background: white;
+.verificar-card {
+  background: var(--color-fondo-tarjeta, #ffffff);
   padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
   text-align: center;
 }
 
-.mensaje-estado p {
-  color: #6b7280;
+.mensaje-estado {
+  &__icono {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    color: var(--color-texto-secundario, #6b7280);
+    margin: 0 0 1rem;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-borde, #e5e7eb);
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .mensaje-exito {
-  p:first-child {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #16a34a;
+  &__icono {
+    font-size: 3rem;
+    display: block;
     margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #00b894;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    color: var(--color-texto-secundario, #6b7280);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
   }
 }
 
 .mensaje-error-caja {
-  p:first-child {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #dc2626;
+  &__icono {
+    font-size: 3rem;
+    display: block;
     margin-bottom: 0.5rem;
   }
-}
 
-.boton-primario {
-  display: inline-block;
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.65rem 1.25rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-  text-decoration: none;
-  font-size: 0.9rem;
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e17055;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    color: var(--color-texto-secundario, #6b7280);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
 }
 </style>

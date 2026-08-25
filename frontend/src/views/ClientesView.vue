@@ -1,99 +1,114 @@
 <template>
   <div class="clientes-view">
     <div class="clientes-view__header">
-      <h1>Clientes</h1>
-      <button class="boton-primario" @click="abrirModalCrear">+ Nuevo cliente</button>
+      <div>
+        <h1 class="clientes-view__titulo">Clientes</h1>
+        <p class="clientes-view__subtitulo">Gestiona tu cartera de clientes</p>
+      </div>
+      <button class="btn btn-primary" @click="abrirModalCrear">+ Nuevo cliente</button>
     </div>
 
-    <input
-      v-model="busqueda"
-      type="text"
-      placeholder="Buscar por nombre, apellido o cédula..."
-      class="input-busqueda"
-      @input="buscar"
-    />
+    <div class="clientes-view__filtros">
+      <div class="campo-busqueda">
+        <span class="campo-busqueda__icono">🔍</span>
+        <input
+          v-model="busqueda"
+          type="text"
+          placeholder="Buscar por nombre, apellido o cédula..."
+          class="campo-busqueda__input"
+          @input="buscar"
+        />
+      </div>
+    </div>
 
-    <div v-if="clienteStore.cargando" class="estado-info">Cargando clientes...</div>
+    <div v-if="clienteStore.cargando" class="estado-info">
+      <span class="spinner"></span>
+      Cargando clientes...
+    </div>
     <div v-else-if="clienteStore.clientes.length === 0" class="estado-info">
-      No se encontraron clientes.
+      <span class="estado-info__icono">📭</span>
+      <p>No se encontraron clientes</p>
+      <span class="estado-info__sub">Comienza agregando tu primer cliente</span>
     </div>
 
-    <table v-else class="tabla">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Cédula</th>
-          <th>Teléfono</th>
-          <th>Límite crédito</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="cliente in clienteStore.clientes" :key="cliente.id">
-          <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
-          <td>{{ cliente.cedula }}</td>
-          <td>{{ cliente.telefono || '—' }}</td>
-          <td>${{ Number(cliente.limite_credito).toFixed(2) }}</td>
-          <td>
-            <span class="etiqueta" :class="`etiqueta--${cliente.estado}`">
-              {{ cliente.estado }}
-            </span>
-          </td>
-          <td class="tabla__acciones">
-  <button class="boton-icono" title="Editar" @click="abrirModalEditar(cliente)">✏️</button>
-  <button
-    v-if="authStore.esAdmin() && cliente.estado === 'activo'"
-    class="boton-icono"
-    title="Desactivar"
-    @click="confirmarEliminar(cliente)"
-  >
-    🗑️
-  </button>
-  <button
-    v-if="authStore.esAdmin() && cliente.estado === 'inactivo'"
-    class="boton-icono"
-    title="Reactivar"
-    @click="reactivarCliente(cliente)"
-  >
-    ✅
-  </button>
-</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Teléfono</th>
+            <th>Límite crédito</th>
+            <th>Estado</th>
+            <th class="table__acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="cliente in clienteStore.clientes" :key="cliente.id">
+            <td><strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong></td>
+            <td>{{ cliente.cedula }}</td>
+            <td>{{ cliente.telefono || '—' }}</td>
+            <td>${{ Number(cliente.limite_credito).toFixed(2) }}</td>
+            <td>
+              <span class="badge" :class="`badge--${cliente.estado}`">
+                {{ cliente.estado }}
+              </span>
+            </td>
+            <td class="table__acciones">
+              <button class="btn-icon" title="Editar" @click="abrirModalEditar(cliente)">✏️</button>
+              <button
+                v-if="authStore.esAdmin() && cliente.estado === 'activo'"
+                class="btn-icon btn-icon--danger"
+                title="Desactivar"
+                @click="confirmarEliminar(cliente)"
+              >
+                🗑️
+              </button>
+              <button
+                v-if="authStore.esAdmin() && cliente.estado === 'inactivo'"
+                class="btn-icon btn-icon--success"
+                title="Reactivar"
+                @click="reactivarCliente(cliente)"
+              >
+                ✅
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Modal Crear/Editar -->
     <BaseModal :visible="modalVisible" :titulo="clienteEditando ? 'Editar cliente' : 'Nuevo cliente'" @cerrar="cerrarModal">
       <form class="form-cliente" @submit.prevent="guardarCliente">
-        <div class="campo">
+        <div class="form-group">
           <label>Nombre</label>
-          <input v-model="formulario.nombre" type="text" required />
+          <input v-model="formulario.nombre" type="text" class="form-control" required />
         </div>
-        <div class="campo">
+        <div class="form-group">
           <label>Apellido</label>
-          <input v-model="formulario.apellido" type="text" required />
+          <input v-model="formulario.apellido" type="text" class="form-control" required />
         </div>
-        <div class="campo">
+        <div class="form-group">
           <label>Cédula</label>
-          <input v-model="formulario.cedula" type="text" required :disabled="!!clienteEditando" />
+          <input v-model="formulario.cedula" type="text" class="form-control" required :disabled="!!clienteEditando" />
         </div>
-        <div class="campo">
+        <div class="form-group">
           <label>Teléfono</label>
-          <input v-model="formulario.telefono" type="text" />
+          <input v-model="formulario.telefono" type="text" class="form-control" />
         </div>
-        <div class="campo">
+        <div class="form-group">
           <label>Dirección</label>
-          <input v-model="formulario.direccion" type="text" />
+          <input v-model="formulario.direccion" type="text" class="form-control" />
         </div>
-        <div class="campo">
+        <div class="form-group">
           <label>Email</label>
-          <input v-model="formulario.email" type="email" />
+          <input v-model="formulario.email" type="email" class="form-control" />
         </div>
 
-        <div class="campo" v-if="authStore.esAdmin() || authStore.esSupervisor()">
+        <div v-if="authStore.esAdmin() || authStore.esSupervisor()" class="form-group">
           <label>Límite de crédito</label>
-          <input v-model.number="formulario.limite_credito" type="number" step="0.01" min="0" />
+          <input v-model.number="formulario.limite_credito" type="number" step="0.01" min="0" class="form-control" />
         </div>
         <p v-else class="nota">
           Solo un administrador o supervisor puede asignar el límite de crédito.
@@ -101,7 +116,8 @@
 
         <p v-if="errorMensaje" class="mensaje-error">{{ errorMensaje }}</p>
 
-        <button type="submit" class="boton-primario" :disabled="guardando">
+        <button type="submit" class="btn btn-primary" :disabled="guardando">
+          <span v-if="guardando" class="spinner"></span>
           {{ guardando ? 'Guardando...' : 'Guardar' }}
         </button>
       </form>
@@ -125,7 +141,7 @@ const clienteEditando = ref<Cliente | null>(null);
 const guardando = ref(false);
 const errorMensaje = ref('');
 
-const formularioVacio: ClienteFormulario = {
+const formularioVacio = (): ClienteFormulario => ({
   nombre: '',
   apellido: '',
   cedula: '',
@@ -133,9 +149,9 @@ const formularioVacio: ClienteFormulario = {
   direccion: '',
   email: '',
   limite_credito: 0,
-};
+});
 
-const formulario = ref<ClienteFormulario>({ ...formularioVacio });
+const formulario = ref<ClienteFormulario>({ ...formularioVacio() });
 
 onMounted(() => {
   clienteStore.cargarClientes();
@@ -151,7 +167,7 @@ const buscar = () => {
 
 const abrirModalCrear = () => {
   clienteEditando.value = null;
-  formulario.value = { ...formularioVacio };
+  formulario.value = { ...formularioVacio() };
   errorMensaje.value = '';
   modalVisible.value = true;
 };
@@ -179,12 +195,14 @@ const guardarCliente = async () => {
   errorMensaje.value = '';
   guardando.value = true;
   try {
-    // Convertimos strings vacíos a null, para no romper validaciones opcionales del backend (ej. email)
-    const datosLimpios = {
-      ...formulario.value,
-      telefono: formulario.value.telefono || null,
-      direccion: formulario.value.direccion || null,
-      email: formulario.value.email || null,
+    const datosLimpios: ClienteFormulario = {
+      nombre: formulario.value.nombre,
+      apellido: formulario.value.apellido,
+      cedula: formulario.value.cedula,
+      telefono: formulario.value.telefono || undefined,
+      direccion: formulario.value.direccion || undefined,
+      email: formulario.value.email || undefined,
+      limite_credito: formulario.value.limite_credito,
     };
 
     if (clienteEditando.value) {
@@ -212,6 +230,7 @@ const confirmarEliminar = async (cliente: Cliente) => {
     alert(error.response?.data?.error || 'Error al desactivar el cliente');
   }
 };
+
 const reactivarCliente = async (cliente: Cliente) => {
   const confirmado = window.confirm(`¿Reactivar a ${cliente.nombre} ${cliente.apellido}?`);
   if (!confirmado) return;
@@ -229,94 +248,133 @@ const reactivarCliente = async (cliente: Cliente) => {
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
+  &__titulo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitulo {
+    color: var(--color-texto-secundario, #6b7280);
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  &__filtros {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.campo-busqueda {
+  display: flex;
+  align-items: center;
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border: 2px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  border-radius: 12px;
+  padding: 0 0.9rem;
+  transition: all 0.3s;
+  max-width: 400px;
+
+  &:focus-within {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+  }
+
+  &__icono {
+    font-size: 0.9rem;
+    opacity: 0.5;
+  }
+
+  &__input {
+    flex: 1;
+    padding: 0.7rem 0.8rem;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: var(--color-texto-primario, #1a1a2e);
+    outline: none;
+    min-width: 0;
+
+    &::placeholder {
+      color: var(--color-texto-secundario, #9ca3af);
+      opacity: 0.6;
     }
   }
 }
 
-.input-busqueda {
-  width: 100%;
-  max-width: 360px;
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--color-borde);
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  background: var(--color-input-fondo);
-  color: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: #4f46e5;
-  }
-}
-
 .estado-info {
-  padding: 2rem;
-  text-align: center;
-  color: #6b7280;
-}
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-texto-secundario, #6b7280);
 
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--color-fondo-tarjeta);
-  border-radius: 10px;
-  overflow: hidden;
-
-  th, td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-size: 0.88rem;
-    border-bottom: 1px solid var(--color-borde);
+  &__icono {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
   }
 
-  th {
+  p {
+    font-size: 0.95rem;
     font-weight: 600;
-    color: var(--color-texto-secundario);
-    font-size: 0.78rem;
-    text-transform: uppercase;
+    margin: 0;
   }
 
-  &__acciones {
-    display: flex;
-    gap: 0.4rem;
+  &__sub {
+    font-size: 0.85rem;
+    opacity: 0.7;
   }
 }
 
-.boton-icono {
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-borde, #e5e7eb);
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.table__acciones {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+
+.btn-icon {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   padding: 0.25rem 0.4rem;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: all 0.2s;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
-  }
-}
-
-.etiqueta {
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-
-  &--activo {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--color-borde, rgba(0, 0, 0, 0.06));
+    transform: scale(1.1);
   }
 
-  &--inactivo {
-    background: #fee2e2;
-    color: #dc2626;
+  &--danger:hover {
+    background: rgba(225, 112, 85, 0.1);
+  }
+
+  &--success:hover {
+    background: rgba(0, 184, 148, 0.1);
   }
 }
 
@@ -326,68 +384,20 @@ const reactivarCliente = async (cliente: Cliente) => {
   gap: 0.9rem;
 }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-
-  label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #6b7280;
-  }
-
-  input {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: var(--color-input-fondo);
-    color: inherit;
-
-    &:focus {
-      outline: none;
-      border-color: #4f46e5;
-    }
-
-    &:disabled {
-      background: rgba(128, 128, 128, 0.15);
-      cursor: not-allowed;
-    }
-  }
-}
-
 .nota {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--color-texto-claro, #9ca3af);
   font-style: italic;
+  margin: 0;
 }
 
 .mensaje-error {
-  color: #dc2626;
+  color: #e17055;
   font-size: 0.85rem;
-  background: #fef2f2;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-}
-
-.boton-primario {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: #4338ca;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  background: rgba(225, 112, 85, 0.1);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  margin: 0;
+  border-left: 3px solid #e17055;
 }
 </style>

@@ -1,80 +1,92 @@
 <template>
   <div class="creditos-view">
     <div class="creditos-view__header">
-      <h1>Créditos</h1>
-
-      <div class="filtros">
-        <button
-          v-for="opcion in filtrosEstado"
-          :key="opcion.valor"
-          class="filtro-boton"
-          :class="{ 'filtro-boton--activo': filtroActivo === opcion.valor }"
-          @click="cambiarFiltro(opcion.valor)"
-        >
-          {{ opcion.etiqueta }}
-        </button>
+      <div>
+        <h1 class="creditos-view__titulo">Créditos</h1>
+        <p class="creditos-view__subtitulo">Gestiona los créditos de tus clientes</p>
       </div>
     </div>
 
-    <div v-if="creditoStore.cargando" class="estado-info">Cargando créditos...</div>
-    <div v-else-if="creditoStore.creditos.length === 0" class="estado-info">
-      No hay créditos {{ filtroActivo ? `en estado "${filtroActivo}"` : '' }}.
+    <div class="filtros">
+      <button
+        v-for="opcion in filtrosEstado"
+        :key="opcion.valor"
+        class="filtro-boton"
+        :class="{ 'filtro-boton--activo': filtroActivo === opcion.valor }"
+        @click="cambiarFiltro(opcion.valor)"
+      >
+        {{ opcion.etiqueta }}
+      </button>
     </div>
 
-    <table v-else class="tabla">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Monto total</th>
-          <th>Saldo</th>
-          <th>Fecha límite</th>
-          <th>Estado</th>
-          <th>Mora</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="credito in creditoStore.creditos" :key="credito.id">
-          <td>{{ credito.Cliente.nombre }} {{ credito.Cliente.apellido }}</td>
-          <td>${{ Number(credito.monto_total).toFixed(2) }}</td>
-          <td><strong>${{ Number(credito.saldo).toFixed(2) }}</strong></td>
-          <td>{{ formatearFecha(credito.fecha_limite) }}</td>
-          <td>
-            <span class="etiqueta" :class="`etiqueta--${credito.estado}`">
-              {{ credito.estado }}
-            </span>
-          </td>
-          <td>
-            <span v-if="credito.dias_mora > 0" class="mora">
-              {{ credito.dias_mora }} día(s)
-            </span>
-            <span v-else>—</span>
-          </td>
-          <td>
-            <button
-              v-if="credito.estado !== 'pagado'"
-              class="boton-secundario"
-              @click="abrirModalPago(credito)"
-            >
-              💰 Pagar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-if="creditoStore.cargando" class="estado-info">
+      <span class="spinner"></span>
+      Cargando créditos...
+    </div>
+    <div v-else-if="creditoStore.creditos.length === 0" class="estado-info">
+      <span class="estado-info__icono">💳</span>
+      <p>No hay créditos {{ filtroActivo ? `en estado "${filtroActivo}"` : '' }}</p>
+    </div>
+
+    <div v-else class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Monto total</th>
+            <th>Saldo</th>
+            <th>Fecha límite</th>
+            <th>Estado</th>
+            <th>Mora</th>
+            <th class="table__acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="credito in creditoStore.creditos" :key="credito.id">
+            <td><strong>{{ credito.Cliente.nombre }} {{ credito.Cliente.apellido }}</strong></td>
+            <td>${{ Number(credito.monto_total).toFixed(2) }}</td>
+            <td class="table__saldo">${{ Number(credito.saldo).toFixed(2) }}</td>
+            <td>{{ formatearFecha(credito.fecha_limite) }}</td>
+            <td>
+              <span class="badge" :class="`badge--${credito.estado}`">
+                {{ credito.estado }}
+              </span>
+            </td>
+            <td>
+              <span v-if="credito.dias_mora > 0" class="badge-mora">
+                {{ credito.dias_mora }} día(s)
+              </span>
+              <span v-else class="text-muted">—</span>
+            </td>
+            <td class="table__acciones">
+              <button
+                v-if="credito.estado !== 'pagado'"
+                class="btn btn-success btn-sm"
+                @click="abrirModalPago(credito)"
+              >
+                💰 Pagar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Modal Registrar Pago -->
     <BaseModal :visible="modalVisible" titulo="Registrar pago" @cerrar="cerrarModal">
       <div v-if="creditoSeleccionado" class="detalle-credito">
-        <p>
-          <strong>Cliente:</strong>
-          {{ creditoSeleccionado.Cliente.nombre }} {{ creditoSeleccionado.Cliente.apellido }}
-        </p>
-        <p><strong>Saldo pendiente:</strong> ${{ Number(creditoSeleccionado.saldo).toFixed(2) }}</p>
+        <div class="detalle-credito__item">
+          <span class="detalle-credito__label">Cliente:</span>
+          <span class="detalle-credito__valor">{{ creditoSeleccionado.Cliente.nombre }} {{ creditoSeleccionado.Cliente.apellido }}</span>
+        </div>
+        <div class="detalle-credito__item">
+          <span class="detalle-credito__label">Saldo pendiente:</span>
+          <span class="detalle-credito__valor detalle-credito__valor--destacado">${{ Number(creditoSeleccionado.saldo).toFixed(2) }}</span>
+        </div>
       </div>
 
       <form class="form-pago" @submit.prevent="guardarPago">
-        <div class="campo">
+        <div class="form-group">
           <label>Monto a pagar</label>
           <input
             v-model.number="montoPago"
@@ -82,13 +94,15 @@
             min="0.01"
             step="0.01"
             :max="creditoSeleccionado ? Number(creditoSeleccionado.saldo) : undefined"
+            class="form-control"
             required
           />
         </div>
 
         <p v-if="errorMensaje" class="mensaje-error">{{ errorMensaje }}</p>
 
-        <button type="submit" class="boton-primario" :disabled="guardando">
+        <button type="submit" class="btn btn-success" :disabled="guardando">
+          <span v-if="guardando" class="spinner"></span>
           {{ guardando ? 'Registrando...' : 'Registrar pago' }}
         </button>
       </form>
@@ -170,125 +184,145 @@ const guardarPago = async () => {
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
+  }
 
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
+  &__titulo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitulo {
+    color: var(--color-texto-secundario, #6b7280);
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
   }
 }
 
 .filtros {
   display: flex;
   gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .filtro-boton {
   padding: 0.4rem 0.85rem;
-  border: 1px solid var(--color-borde);
-  background: var(--color-fondo-tarjeta);
-  color: inherit;
+  border: 2px solid var(--color-borde, #e5e7eb);
+  background: var(--color-fondo-tarjeta, #ffffff);
+  color: var(--color-texto-primario, #1a1a2e);
   border-radius: 999px;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.3s;
+  font-weight: 500;
 
   &:hover {
-    border-color: #4f46e5;
+    border-color: #6c5ce7;
+    transform: translateY(-1px);
   }
 
   &--activo {
-    background: #4f46e5;
-    border-color: #4f46e5;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    border-color: #6c5ce7;
     color: white;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
   }
 }
 
 .estado-info {
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
   color: var(--color-texto-secundario, #6b7280);
-}
 
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--color-fondo-tarjeta);
-  border-radius: 10px;
-  overflow: hidden;
-
-  th, td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-size: 0.88rem;
-    border-bottom: 1px solid var(--color-borde);
+  &__icono {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
   }
 
-  th {
+  p {
+    font-size: 0.95rem;
     font-weight: 600;
-    color: var(--color-texto-secundario);
-    font-size: 0.78rem;
-    text-transform: uppercase;
+    margin: 0;
   }
 }
 
-.etiqueta {
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
 
-  &--pendiente {
-    background: #fef3c7;
-    color: #d97706;
-  }
-
-  &--pagado {
-    background: #dcfce7;
-    color: #16a34a;
-  }
-
-  &--vencido {
-    background: #fee2e2;
-    color: #dc2626;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-.mora {
-  color: #dc2626;
-  font-weight: 600;
-  font-size: 0.85rem;
+.table__saldo {
+  font-weight: 700;
+  color: #6c5ce7;
 }
 
-.boton-secundario {
-  background: none;
-  border: 1px solid #4f46e5;
-  color: #4f46e5;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
+.table__acciones {
+  text-align: right;
+}
 
-  &:hover {
-    background: #eef2ff;
-  }
+.badge-mora {
+  background: rgba(225, 112, 85, 0.12);
+  color: #e17055;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--color-texto-claro, #9ca3af);
 }
 
 .detalle-credito {
-  background: var(--color-input-fondo, #f9fafb);
-  padding: 0.85rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.88rem;
+  background: var(--color-fondo-input, #f8fafc);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
 
-  p {
-    margin: 0.25rem 0;
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
+    }
+  }
+
+  &__label {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario, #6b7280);
+  }
+
+  &__valor {
+    font-size: 0.85rem;
+    font-weight: 500;
+
+    &--destacado {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #6c5ce7;
+    }
   }
 }
 
@@ -298,57 +332,13 @@ const guardarPago = async () => {
   gap: 1rem;
 }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--color-texto-secundario, #6b7280);
-  }
-
-  input {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: var(--color-input-fondo, white);
-    color: inherit;
-
-    &:focus {
-      outline: none;
-      border-color: #4f46e5;
-    }
-  }
-}
-
 .mensaje-error {
-  color: #dc2626;
+  color: #e17055;
   font-size: 0.85rem;
-  background: #fef2f2;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-}
-
-.boton-primario {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: #4338ca;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  background: rgba(225, 112, 85, 0.1);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  margin: 0;
+  border-left: 3px solid #e17055;
 }
 </style>

@@ -1,28 +1,35 @@
 <template>
   <div class="reportes-view">
-    <h1>Reportes</h1>
-    <p class="descripcion">Exporta la información del negocio en Excel o PDF.</p>
+    <div class="reportes-view__header">
+      <div>
+        <h1 class="reportes-view__titulo">Reportes</h1>
+        <p class="reportes-view__subtitulo">Exporta la información del negocio en Excel o PDF</p>
+      </div>
+    </div>
 
     <div class="reportes-grid">
       <!-- Ventas -->
       <div class="reporte-card">
-        <h3>📊 Ventas</h3>
-        <p>Historial completo de ventas, con cliente, método de pago y total.</p>
+        <div class="reporte-card__icono">📊</div>
+        <h3 class="reporte-card__titulo">Ventas</h3>
+        <p class="reporte-card__descripcion">Historial completo de ventas, con cliente, método de pago y total.</p>
 
-        <div class="campo-fecha">
-          <label>Desde</label>
-          <input v-model="filtrosVentas.desde" type="date" />
-        </div>
-        <div class="campo-fecha">
-          <label>Hasta</label>
-          <input v-model="filtrosVentas.hasta" type="date" />
+        <div class="reporte-card__filtros">
+          <div class="campo-fecha">
+            <label>Desde</label>
+            <input v-model="filtrosVentas.desde" type="date" class="form-control" />
+          </div>
+          <div class="campo-fecha">
+            <label>Hasta</label>
+            <input v-model="filtrosVentas.hasta" type="date" class="form-control" />
+          </div>
         </div>
 
         <div class="reporte-card__botones">
-          <button class="boton-excel" :disabled="descargando" @click="descargar('ventas', 'excel')">
+          <button class="btn btn-success btn-sm" :disabled="descargando" @click="descargar('ventas', 'excel')">
             📗 Excel
           </button>
-          <button class="boton-pdf" :disabled="descargando" @click="descargar('ventas', 'pdf')">
+          <button class="btn btn-danger btn-sm" :disabled="descargando" @click="descargar('ventas', 'pdf')">
             📕 PDF
           </button>
         </div>
@@ -30,14 +37,15 @@
 
       <!-- Clientes -->
       <div class="reporte-card">
-        <h3>👥 Clientes</h3>
-        <p>Listado completo de clientes, con límite de crédito y estado.</p>
+        <div class="reporte-card__icono">👥</div>
+        <h3 class="reporte-card__titulo">Clientes</h3>
+        <p class="reporte-card__descripcion">Listado completo de clientes, con límite de crédito y estado.</p>
 
         <div class="reporte-card__botones">
-          <button class="boton-excel" :disabled="descargando" @click="descargar('clientes', 'excel')">
+          <button class="btn btn-success btn-sm" :disabled="descargando" @click="descargar('clientes', 'excel')">
             📗 Excel
           </button>
-          <button class="boton-pdf" :disabled="descargando" @click="descargar('clientes', 'pdf')">
+          <button class="btn btn-danger btn-sm" :disabled="descargando" @click="descargar('clientes', 'pdf')">
             📕 PDF
           </button>
         </div>
@@ -45,24 +53,27 @@
 
       <!-- Créditos -->
       <div class="reporte-card">
-        <h3>💳 Créditos</h3>
-        <p>Créditos activos, pagados y vencidos, con días de mora.</p>
+        <div class="reporte-card__icono">💳</div>
+        <h3 class="reporte-card__titulo">Créditos</h3>
+        <p class="reporte-card__descripcion">Créditos activos, pagados y vencidos, con días de mora.</p>
 
-        <div class="campo-fecha">
-          <label>Filtrar por estado</label>
-          <select v-model="estadoCreditos">
-            <option value="">Todos</option>
-            <option value="pendiente">Pendientes</option>
-            <option value="vencido">Vencidos</option>
-            <option value="pagado">Pagados</option>
-          </select>
+        <div class="reporte-card__filtros">
+          <div class="campo-fecha">
+            <label>Filtrar por estado</label>
+            <select v-model="estadoCreditos" class="form-control">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="vencido">Vencidos</option>
+              <option value="pagado">Pagados</option>
+            </select>
+          </div>
         </div>
 
         <div class="reporte-card__botones">
-          <button class="boton-excel" :disabled="descargando" @click="descargar('creditos', 'excel')">
+          <button class="btn btn-success btn-sm" :disabled="descargando" @click="descargar('creditos', 'excel')">
             📗 Excel
           </button>
-          <button class="boton-pdf" :disabled="descargando" @click="descargar('creditos', 'pdf')">
+          <button class="btn btn-danger btn-sm" :disabled="descargando" @click="descargar('creditos', 'pdf')">
             📕 PDF
           </button>
         </div>
@@ -70,23 +81,26 @@
 
       <!-- Pagos -->
       <div class="reporte-card">
-        <h3>💰 Pagos</h3>
-        <p>Historial de pagos recibidos, con cliente y usuario que los registró.</p>
+        <div class="reporte-card__icono">💰</div>
+        <h3 class="reporte-card__titulo">Pagos</h3>
+        <p class="reporte-card__descripcion">Historial de pagos recibidos, con cliente y usuario que los registró.</p>
 
-        <div class="campo-fecha">
-          <label>Desde</label>
-          <input v-model="filtrosPagos.desde" type="date" />
-        </div>
-        <div class="campo-fecha">
-          <label>Hasta</label>
-          <input v-model="filtrosPagos.hasta" type="date" />
+        <div class="reporte-card__filtros">
+          <div class="campo-fecha">
+            <label>Desde</label>
+            <input v-model="filtrosPagos.desde" type="date" class="form-control" />
+          </div>
+          <div class="campo-fecha">
+            <label>Hasta</label>
+            <input v-model="filtrosPagos.hasta" type="date" class="form-control" />
+          </div>
         </div>
 
         <div class="reporte-card__botones">
-          <button class="boton-excel" :disabled="descargando" @click="descargar('pagos', 'excel')">
+          <button class="btn btn-success btn-sm" :disabled="descargando" @click="descargar('pagos', 'excel')">
             📗 Excel
           </button>
-          <button class="boton-pdf" :disabled="descargando" @click="descargar('pagos', 'pdf')">
+          <button class="btn btn-danger btn-sm" :disabled="descargando" @click="descargar('pagos', 'pdf')">
             📕 PDF
           </button>
         </div>
@@ -139,16 +153,22 @@ const descargar = async (tipo: TipoReporte, formato: Formato) => {
 
 <style scoped lang="scss">
 .reportes-view {
-  h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
+  &__header {
+    margin-bottom: 1.5rem;
   }
-}
 
-.descripcion {
-  color: var(--color-texto-secundario, #6b7280);
-  margin-bottom: 1.5rem;
+  &__titulo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitulo {
+    color: var(--color-texto-secundario, #6b7280);
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+  }
 }
 
 .reportes-grid {
@@ -158,26 +178,56 @@ const descargar = async (tipo: TipoReporte, formato: Formato) => {
 }
 
 .reporte-card {
-  background: var(--color-fondo-tarjeta);
-  border-radius: 12px;
-  padding: 1.25rem;
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
 
-  h3 {
-    margin: 0 0 0.4rem;
-    font-size: 1rem;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
   }
 
-  p {
+  &__icono {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__titulo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.3rem;
+  }
+
+  &__descripcion {
     font-size: 0.85rem;
     color: var(--color-texto-secundario, #6b7280);
     margin: 0 0 1rem;
     line-height: 1.4;
+    flex: 1;
+  }
+
+  &__filtros {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .campo-fecha {
+      flex: 1;
+    }
   }
 
   &__botones {
     display: flex;
     gap: 0.6rem;
-    margin-top: 1rem;
+    margin-top: auto;
+
+    .btn {
+      flex: 1;
+    }
   }
 }
 
@@ -185,63 +235,26 @@ const descargar = async (tipo: TipoReporte, formato: Formato) => {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  margin-bottom: 0.75rem;
 
   label {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--color-texto-secundario, #6b7280);
   }
 
-  input, select {
-    padding: 0.5rem 0.65rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    background: var(--color-input-fondo, white);
-    color: inherit;
-  }
-}
-
-.boton-excel, .boton-pdf {
-  flex: 1;
-  padding: 0.55rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.boton-excel {
-  background: #dcfce7;
-  color: #16a34a;
-
-  &:hover:not(:disabled) {
-    background: #bbf7d0;
-  }
-}
-
-.boton-pdf {
-  background: #fee2e2;
-  color: #dc2626;
-
-  &:hover:not(:disabled) {
-    background: #fecaca;
+  .form-control {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
   }
 }
 
 .mensaje-error {
   margin-top: 1rem;
-  color: #dc2626;
+  color: #e17055;
   font-size: 0.85rem;
-  background: #fef2f2;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
+  background: rgba(225, 112, 85, 0.1);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border-left: 3px solid #e17055;
 }
 </style>

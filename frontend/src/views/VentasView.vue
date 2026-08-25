@@ -1,44 +1,54 @@
 <template>
   <div class="ventas-view">
     <div class="ventas-view__header">
-      <h1>Ventas</h1>
-      <button class="boton-primario" @click="abrirModal">+ Nueva venta</button>
+      <div>
+        <h1 class="ventas-view__titulo">Ventas</h1>
+        <p class="ventas-view__subtitulo">Registra y gestiona tus ventas</p>
+      </div>
+      <button class="btn btn-primary" @click="abrirModal">+ Nueva venta</button>
     </div>
 
-    <div v-if="ventaStore.cargando" class="estado-info">Cargando ventas...</div>
+    <div v-if="ventaStore.cargando" class="estado-info">
+      <span class="spinner"></span>
+      Cargando ventas...
+    </div>
     <div v-else-if="ventaStore.ventas.length === 0" class="estado-info">
-      Aún no hay ventas registradas.
+      <span class="estado-info__icono">🛒</span>
+      <p>Aún no hay ventas registradas</p>
+      <span class="estado-info__sub">Comienza registrando tu primera venta</span>
     </div>
 
-    <table v-else class="tabla">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Cliente</th>
-          <th>Método</th>
-          <th>Total</th>
-          <th>Ítems</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="venta in ventaStore.ventas" :key="venta.id">
-          <td>{{ formatearFecha(venta.fecha) }}</td>
-          <td>{{ venta.Cliente ? `${venta.Cliente.nombre} ${venta.Cliente.apellido}` : 'Consumidor final' }}</td>
-          <td>
-            <span class="etiqueta" :class="`etiqueta--${venta.metodo_pago}`">
-              {{ venta.metodo_pago }}
-            </span>
-          </td>
-          <td>${{ Number(venta.total).toFixed(2) }}</td>
-          <td>{{ venta.detalles.length }} ítem(s)</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Método</th>
+            <th>Total</th>
+            <th>Ítems</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="venta in ventaStore.ventas" :key="venta.id">
+            <td>{{ formatearFecha(venta.fecha) }}</td>
+            <td>{{ venta.Cliente ? `${venta.Cliente.nombre} ${venta.Cliente.apellido}` : 'Consumidor final' }}</td>
+            <td>
+              <span class="badge" :class="`badge--${venta.metodo_pago}`">
+                {{ venta.metodo_pago }}
+              </span>
+            </td>
+            <td><strong>${{ Number(venta.total).toFixed(2) }}</strong></td>
+            <td>{{ venta.detalles.length }} ítem(s)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Modal Nueva Venta -->
     <BaseModal :visible="modalVisible" titulo="Registrar venta" @cerrar="cerrarModal">
       <form class="form-venta" @submit.prevent="guardarVenta">
-        <div class="campo">
+        <div class="form-group">
           <label>Método de pago</label>
           <div class="opciones-pago">
             <button
@@ -60,9 +70,9 @@
           </div>
         </div>
 
-        <div class="campo" v-if="formulario.metodo_pago === 'fiado'">
+        <div v-if="formulario.metodo_pago === 'fiado'" class="form-group">
           <label>Cliente</label>
-          <select v-model.number="formulario.cliente_id" required>
+          <select v-model.number="formulario.cliente_id" class="form-control" required>
             <option :value="null" disabled>Selecciona un cliente</option>
             <option
               v-for="cliente in clientesActivos"
@@ -74,19 +84,19 @@
           </select>
         </div>
 
-        <div class="campo" v-if="formulario.metodo_pago === 'fiado'">
+        <div v-if="formulario.metodo_pago === 'fiado'" class="form-group">
           <label>Plazo (días)</label>
-          <input v-model.number="formulario.dias_plazo" type="number" min="1" placeholder="15" />
+          <input v-model.number="formulario.dias_plazo" type="number" min="1" placeholder="15" class="form-control" />
         </div>
 
-        <div class="campo">
+        <div class="form-group">
           <label>Observaciones</label>
-          <input v-model="formulario.observaciones" type="text" placeholder="Opcional" />
+          <input v-model="formulario.observaciones" type="text" placeholder="Opcional" class="form-control" />
         </div>
 
         <hr class="separador" />
 
-        <div class="campo">
+        <div class="form-group">
           <label>Ítems de la venta</label>
 
           <div v-for="(item, index) in formulario.detalles" :key="index" class="item-fila">
@@ -94,7 +104,7 @@
               v-model="item.descripcion"
               type="text"
               placeholder="Descripción"
-              class="item-fila__descripcion"
+              class="form-control item-fila__descripcion"
               required
             />
             <input
@@ -102,7 +112,7 @@
               type="number"
               min="1"
               placeholder="Cant."
-              class="item-fila__numero"
+              class="form-control item-fila__numero"
               required
             />
             <input
@@ -111,7 +121,7 @@
               min="0"
               step="0.01"
               placeholder="Precio"
-              class="item-fila__numero"
+              class="form-control item-fila__numero"
               required
             />
             <span class="item-fila__subtotal">
@@ -127,7 +137,7 @@
             </button>
           </div>
 
-          <button type="button" class="boton-secundario" @click="agregarItem">
+          <button type="button" class="btn btn-outline btn-sm" @click="agregarItem">
             + Agregar ítem
           </button>
         </div>
@@ -139,7 +149,8 @@
 
         <p v-if="errorMensaje" class="mensaje-error">{{ errorMensaje }}</p>
 
-        <button type="submit" class="boton-primario" :disabled="guardando">
+        <button type="submit" class="btn btn-primary" :disabled="guardando">
+          <span v-if="guardando" class="spinner"></span>
           {{ guardando ? 'Registrando...' : 'Registrar venta' }}
         </button>
       </form>
@@ -231,59 +242,63 @@ const guardarVenta = async () => {
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
+  &__titulo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitulo {
+    color: var(--color-texto-secundario, #6b7280);
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
   }
 }
 
 .estado-info {
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
   color: var(--color-texto-secundario, #6b7280);
-}
 
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--color-fondo-tarjeta);
-  border-radius: 10px;
-  overflow: hidden;
-
-  th, td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-size: 0.88rem;
-    border-bottom: 1px solid var(--color-borde);
+  &__icono {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
   }
 
-  th {
+  p {
+    font-size: 0.95rem;
     font-weight: 600;
-    color: var(--color-texto-secundario);
-    font-size: 0.78rem;
-    text-transform: uppercase;
+    margin: 0;
+  }
+
+  &__sub {
+    font-size: 0.85rem;
+    opacity: 0.7;
   }
 }
 
-.etiqueta {
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
 
-  &--contado {
-    background: #dbeafe;
-    color: #2563eb;
-  }
-
-  &--fiado {
-    background: #fef3c7;
-    color: #d97706;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -291,32 +306,6 @@ const guardarVenta = async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--color-texto-secundario, #6b7280);
-  }
-
-  input, select {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid var(--color-borde);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: var(--color-input-fondo, white);
-    color: inherit;
-
-    &:focus {
-      outline: none;
-      border-color: #4f46e5;
-    }
-  }
 }
 
 .opciones-pago {
@@ -327,25 +316,30 @@ const guardarVenta = async () => {
 .opcion-pago {
   flex: 1;
   padding: 0.6rem;
-  border: 1px solid var(--color-borde);
-  background: var(--color-input-fondo, white);
-  color: inherit;
-  border-radius: 8px;
+  border: 2px solid var(--color-borde, #e5e7eb);
+  background: var(--color-fondo-input, #f8fafc);
+  color: var(--color-texto-primario, #1a1a2e);
+  border-radius: 10px;
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;
-  transition: all 0.15s;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: var(--color-texto-secundario);
+  }
 
   &--activa {
-    border-color: #4f46e5;
-    background: #eef2ff;
-    color: #4f46e5;
+    border-color: #6c5ce7;
+    background: rgba(108, 92, 231, 0.08);
+    color: #6c5ce7;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
   }
 }
 
 .separador {
   border: none;
-  border-top: 1px solid var(--color-borde);
+  border-top: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
   margin: 0.25rem 0;
 }
 
@@ -356,23 +350,36 @@ const guardarVenta = async () => {
   align-items: center;
   margin-bottom: 0.5rem;
 
-  input {
-    padding: 0.45rem 0.6rem;
-    font-size: 0.85rem;
+  &__descripcion {
+    min-width: 0;
+  }
+
+  &__numero {
+    min-width: 0;
+    text-align: center;
   }
 
   &__subtotal {
     font-size: 0.82rem;
     font-weight: 600;
     text-align: right;
+    color: var(--color-texto-primario, #1a1a2e);
   }
 
   &__quitar {
     background: none;
     border: none;
-    color: #dc2626;
+    color: #e17055;
     cursor: pointer;
     font-size: 0.9rem;
+    padding: 0.2rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: rgba(225, 112, 85, 0.1);
+      transform: scale(1.2);
+    }
 
     &:disabled {
       opacity: 0.3;
@@ -381,61 +388,29 @@ const guardarVenta = async () => {
   }
 }
 
-.boton-secundario {
-  background: none;
-  border: 1px dashed var(--color-borde);
-  color: #4f46e5;
-  padding: 0.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-
-  &:hover {
-    background: #eef2ff;
-  }
-}
-
 .total-venta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: var(--color-input-fondo, #f9fafb);
-  border-radius: 8px;
+  background: var(--color-fondo-input, #f8fafc);
+  border-radius: 10px;
   font-size: 1rem;
+  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
 
   strong {
     font-size: 1.2rem;
-    color: #4f46e5;
+    color: #6c5ce7;
   }
 }
 
 .mensaje-error {
-  color: #dc2626;
+  color: #e17055;
   font-size: 0.85rem;
-  background: #fef2f2;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-}
-
-.boton-primario {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: #4338ca;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  background: rgba(225, 112, 85, 0.1);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  margin: 0;
+  border-left: 3px solid #e17055;
 }
 </style>
