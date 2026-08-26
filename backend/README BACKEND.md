@@ -1,14 +1,13 @@
-# 🥇 Fiado Digital
+# ⚙️ Fiado Digital — Backend
 
-Sistema de gestión de créditos ("fiados") para tiendas pequeñas. Digitaliza un proceso que tradicionalmente se lleva en cuadernos o chats de WhatsApp, dando control real sobre ventas, clientes, créditos y pagos, con dashboard en tiempo real y automatización de cobros.
+API REST que da soporte a todo el sistema Fiado Digital: autenticación, clientes, ventas, créditos, pagos, dashboard en tiempo real, automatización y auditoría.
 
-> Proyecto de portafolio enfocado en arquitectura backend real, seguridad y lógica de negocio — no solo un CRUD genérico.
+> Este README documenta el backend en profundidad. Para la visión general del proyecto (backend + frontend), ver el [README raíz](../README.md). Para el frontend, ver [frontend/README.md](../frontend/README.md).
 
 ---
 
 ## 📋 Tabla de contenido
 
-- [El problema que resuelve](#-el-problema-que-resuelve)
 - [Stack tecnológico](#-stack-tecnológico)
 - [Arquitectura del backend](#-arquitectura-del-backend)
 - [Modelo de datos](#-modelo-de-datos)
@@ -22,34 +21,23 @@ Sistema de gestión de créditos ("fiados") para tiendas pequeñas. Digitaliza u
 
 ---
 
-## 🎯 El problema que resuelve
-
-Las tiendas de barrio en Latinoamérica manejan una práctica muy común: el **fiado** (vender a crédito informal a clientes de confianza). Esto normalmente se controla en un cuaderno físico o en notas de chat, lo que genera:
-
-- Pérdida de control sobre cuánto debe cada cliente
-- Imposibilidad de saber quién está en mora y hace cuánto
-- Ningún historial auditable de ventas, pagos o cambios
-- Nadie recuerda avisar a los clientes antes de que venza su plazo
-
-**Fiado Digital** digitaliza todo ese proceso con control de acceso por roles, cálculo automático de crédito disponible, notificaciones automáticas y reportes exportables.
-
----
-
 ## 🛠️ Stack tecnológico
 
-| Capa | Tecnología |
+| Tecnología | Uso |
 |---|---|
-| Runtime | Node.js |
-| Framework backend | Express.js |
-| Base de datos | PostgreSQL |
-| ORM | Sequelize |
-| Tiempo real | Socket.io |
-| Autenticación | JWT + bcryptjs |
-| Automatización | node-cron |
-| Email | Nodemailer (Gmail) |
-| Reportes | ExcelJS + PDFKit |
-| Testing manual de API | Thunder Client |
-| Frontend (en desarrollo) | Vue 3 + Vite |
+| Node.js | Runtime |
+| Express.js | Framework HTTP / definición de rutas y middlewares |
+| PostgreSQL | Base de datos relacional |
+| Sequelize | ORM — modelos, migraciones automáticas (`sync`), transacciones |
+| Socket.io | Comunicación en tiempo real (dashboard y notificaciones) |
+| jsonwebtoken | Generación y verificación de tokens JWT |
+| bcryptjs | Hashing de contraseñas |
+| Nodemailer | Envío de emails (Gmail + contraseña de aplicación) |
+| node-cron | Programación de tareas automáticas (cron jobs) |
+| ExcelJS | Generación de reportes `.xlsx` |
+| PDFKit | Generación de reportes `.pdf` |
+| dotenv | Variables de entorno |
+| cors | Habilitación de peticiones cross-origin desde el frontend |
 
 ---
 
@@ -58,8 +46,8 @@ Las tiendas de barrio en Latinoamérica manejan una práctica muy común: el **f
 ```
 backend/
 ├── config/
-│   ├── database.js        # Conexión Sequelize a PostgreSQL
-│   └── mailer.js           # Servicio de envío de emails (Nodemailer)
+│   ├── database.js          # Conexión Sequelize a PostgreSQL
+│   └── mailer.js             # Servicio de envío de emails (Nodemailer)
 ├── controllers/
 │   ├── authController.js
 │   ├── clienteController.js
@@ -68,16 +56,17 @@ backend/
 │   ├── dashboardController.js
 │   ├── notificacionController.js
 │   ├── reporteController.js
+│   ├── auditoriaController.js
 │   └── reportes/
-│       ├── excelHelper.js  # Generador genérico de Excel
-│       └── pdfHelper.js    # Generador genérico de PDF
+│       ├── excelHelper.js    # Generador genérico de Excel
+│       └── pdfHelper.js      # Generador genérico de PDF
 ├── jobs/
 │   ├── avisarCobrosPendientes.js
 │   ├── avisarMora.js
 │   ├── resumenDiario.js
-│   └── scheduler.js        # Programación de los cron jobs
+│   └── scheduler.js          # Programación de los cron jobs
 ├── middlewares/
-│   └── authMiddleware.js   # verificarToken + verificarRol
+│   └── authMiddleware.js     # verificarToken + verificarRol
 ├── models/
 │   ├── Usuario.js
 │   ├── Cliente.js
@@ -86,7 +75,8 @@ backend/
 │   ├── Credito.js
 │   ├── Pago.js
 │   ├── Notificacion.js
-│   └── associations.js     # Todas las relaciones entre modelos
+│   ├── Auditoria.js
+│   └── associations.js       # Todas las relaciones entre modelos
 ├── routes/
 │   ├── authRoutes.js
 │   ├── clienteRoutes.js
@@ -94,20 +84,23 @@ backend/
 │   ├── creditoRoutes.js
 │   ├── dashboardRoutes.js
 │   ├── notificacionRoutes.js
-│   └── reporteRoutes.js
-├── .env                     # Variables de entorno (no versionado)
-└── index.js                 # Punto de entrada: Express + Socket.io + Sequelize
+│   ├── reporteRoutes.js
+│   └── auditoriaRoutes.js
+├── utils/
+│   └── auditoria.js          # Función auxiliar reutilizable para registrar auditoría
+├── .env                       # Variables de entorno (no versionado)
+└── index.js                   # Punto de entrada: Express + Socket.io + Sequelize
 ```
 
 ### Patrón de capas
 
-Cada módulo sigue el mismo flujo: **Ruta → Middleware de auth/rol → Controlador → Modelo (Sequelize) → PostgreSQL**. Los controladores nunca acceden a la base de datos directamente sin pasar por los modelos, y las rutas nunca contienen lógica de negocio.
+Cada módulo sigue el mismo flujo: **Ruta → Middleware de auth/rol → Controlador → Modelo (Sequelize) → PostgreSQL**. Los controladores nunca acceden a la base de datos directamente sin pasar por los modelos, y las rutas nunca contienen lógica de negocio. Las acciones sensibles además pasan por `utils/auditoria.js` antes de responder al cliente.
 
 ---
 
 ## 🗄️ Modelo de datos
 
-**6 tablas principales**, todas relacionadas mediante llaves foráneas gestionadas por Sequelize:
+**8 tablas**, todas relacionadas mediante llaves foráneas gestionadas por Sequelize:
 
 ```
 usuarios ──┬──< ventas >──── clientes
@@ -116,8 +109,9 @@ usuarios ──┬──< ventas >──── clientes
            │       │
            │       └──── creditos ────< pagos
            │                              │
-           └──────────────────────────────┘
-           └──< notificaciones
+           ├──────────────────────────────┘
+           ├──< notificaciones
+           └──< auditoria
 ```
 
 - **usuarios**: cuentas del sistema (administrador, cajero, supervisor)
@@ -127,6 +121,7 @@ usuarios ──┬──< ventas >──── clientes
 - **creditos**: se generan automáticamente al registrar una venta fiada
 - **pagos**: abonos registrados contra un crédito
 - **notificaciones**: alertas internas generadas por los cron jobs
+- **auditoria**: registro inmutable de acciones sensibles (crear/editar/desactivar/pago), con detalle estructurado de qué cambió (JSONB)
 
 ---
 
@@ -139,12 +134,13 @@ El sistema tiene 3 roles con permisos diferenciados **por acción**, no solo por
 | Registrar ventas / pagos | ✅ | ✅ | ✅ |
 | Crear / editar clientes (datos generales) | ✅ | ✅ | ✅ |
 | Editar límite de crédito de un cliente | ✅ | ✅ | ❌ |
-| Eliminar cliente (soft delete) | ✅ | ❌ | ❌ |
+| Eliminar cliente (soft delete) / reactivar | ✅ | ❌ | ❌ |
 | Ver dashboard | ✅ | ✅ | ✅ |
 | Ver reportes (PDF/Excel) | ✅ | ✅ | ❌ |
 | Ejecutar jobs de automatización manualmente | ✅ | ❌ | ❌ |
+| Ver historial de auditoría | ✅ | ❌ | ❌ |
 
-Todos los permisos están validados en el **backend** mediante middlewares (`verificarToken`, `verificarRol`), no solo ocultos en el frontend — un usuario no puede saltarse las reglas manipulando la petición.
+Todos los permisos están validados en el **backend** mediante middlewares (`verificarToken`, `verificarRol`), no solo ocultos en el frontend — un usuario no puede saltarse las reglas manipulando la petición directamente.
 
 ---
 
@@ -162,6 +158,7 @@ Todos los permisos están validados en el **backend** mediante middlewares (`ver
 - CRUD completo con búsqueda por nombre, apellido o cédula
 - Eliminación mediante **soft delete** (campo `estado`), nunca se borra un registro físicamente — preserva el historial de ventas/créditos para auditoría
 - Validación de cédula única
+- Cada creación/edición/desactivación queda registrada en el módulo de Auditoría
 
 ### 3. Ventas
 - Venta al contado (sin cliente obligatorio) o fiada (cliente obligatorio)
@@ -172,19 +169,20 @@ Todos los permisos están validados en el **backend** mediante middlewares (`ver
 ### 4. Créditos y pagos
 - Un crédito se genera **automáticamente** al registrar una venta fiada — no existe una ruta para crearlo manualmente, evitando ventas fiadas sin control
 - `dias_mora` y el estado `vencido` se **calculan dinámicamente** en cada consulta comparando la fecha límite con la fecha actual, nunca se guardan como valores fijos que puedan desactualizarse
+- El filtro por estado (`?estado=vencido`) se aplica **después** de calcular el estado real de cada crédito, no contra el valor crudo guardado en la base de datos (bug corregido durante el desarrollo — ver decisiones de diseño)
 - Un pago no puede superar el saldo pendiente del crédito
 - Actualización automática del estado a `pagado` cuando el saldo llega a 0
 
 ### 5. Dashboard + tiempo real
 - Widgets: ventas del día, clientes morosos, crédito activo total, pagos recibidos hoy
 - Gráficos: ventas de los últimos 7 días (barras), distribución contado vs. fiado (circular)
-- **Socket.io**: cualquier venta o pago nuevo emite un evento en tiempo real (`nueva-venta`, `nuevo-pago`) que el frontend puede escuchar para refrescar el dashboard sin recargar la página
+- **Socket.io**: cualquier venta, pago o notificación nueva emite un evento en tiempo real (`nueva-venta`, `nuevo-pago`, `nueva-notificacion`) que el frontend escucha para refrescarse sin recargar la página
 
 ### 6. Automatización (Cron Jobs)
 - **Avisar cobros pendientes**: todos los días a las 8:00 AM, revisa créditos que vencen en los próximos 3 días y notifica por email al cliente + notificación interna a administradores
 - **Avisar mora**: todos los días a las 9:00 AM, revisa créditos vencidos y no pagados
 - **Resumen diario**: todos los días a las 8:00 PM, envía a los administradores un correo con el total de ventas y pagos del día
-- Los 3 jobs también se pueden **ejecutar manualmente** vía endpoint protegido (útil para un botón de "forzar ahora" en el panel de admin)
+- Los 3 jobs también se pueden **ejecutar manualmente** vía endpoint protegido (`/notificaciones/ejecutar/...`), útil para un botón de "forzar ahora" en el panel de administrador
 
 ### 7. Reportes
 - 4 tipos: ventas, clientes, créditos, pagos
@@ -192,6 +190,13 @@ Todos los permisos están validados en el **backend** mediante middlewares (`ver
 - Generadores reutilizables (`excelHelper.js`, `pdfHelper.js`) que reciben columnas y filas genéricas — evita duplicar lógica de exportación 4 veces
 - Filtros opcionales por rango de fechas (`?desde=&hasta=`) y por estado (créditos)
 - Acceso restringido a administrador y supervisor (información financiera sensible)
+
+### 8. Auditoría
+- Registro **inmutable** (sin `updatedAt`, nunca se edita) de acciones sensibles: crear/editar/desactivar/reactivar cliente, registrar venta, registrar pago
+- Cada entrada guarda: usuario que la ejecutó, tipo de acción, entidad afectada (`cliente`, `venta`, `credito`) y su ID, una descripción legible, y opcionalmente un campo `detalles` en `JSONB` con la forma `{ campo: { antes, despues } }`
+- Se implementó como una función auxiliar reutilizable (`registrarAuditoria()`) que se invoca desde los controladores después de cada acción sensible — un fallo al auditar **nunca** bloquea la operación principal, solo se registra en consola
+- Consultable con filtros por entidad, ID de entidad, usuario o tipo de acción
+- Acceso restringido solo a administrador
 
 ---
 
@@ -221,7 +226,7 @@ Authorization: Bearer <token>
 | PUT | `/clientes/:id` | Editar cliente | Admin, Supervisor, Cajero* |
 | DELETE | `/clientes/:id` | Eliminar (soft delete) | Admin |
 
-*Editar `limite_credito` requiere Admin o Supervisor específicamente.
+*Editar `limite_credito` o `estado` requiere Admin o Supervisor específicamente (según el campo).
 
 ### Ventas — `/ventas`
 | Método | Ruta | Descripción | Rol requerido |
@@ -249,6 +254,7 @@ Authorization: Bearer <token>
 |---|---|---|---|
 | GET | `/notificaciones` | Listar mis notificaciones | Autenticado |
 | PUT | `/notificaciones/:id/leer` | Marcar como leída | Autenticado |
+| DELETE | `/notificaciones/:id` | Eliminar notificación | Autenticado |
 | POST | `/notificaciones/ejecutar/cobros-pendientes` | Forzar job | Admin |
 | POST | `/notificaciones/ejecutar/mora` | Forzar job | Admin |
 | POST | `/notificaciones/ejecutar/resumen-diario` | Forzar job | Admin |
@@ -263,6 +269,11 @@ Authorization: Bearer <token>
 
 `formato` acepta `excel` (default) o `pdf`.
 
+### Auditoría — `/auditoria`
+| Método | Ruta | Descripción | Rol requerido |
+|---|---|---|---|
+| GET | `/auditoria?entidad=&entidad_id=&usuario_id=&accion=` | Listar historial (máx. 200 registros) | Admin |
+
 ### Eventos de Socket.io
 | Evento | Cuándo se emite | Payload |
 |---|---|---|
@@ -274,21 +285,27 @@ Authorization: Bearer <token>
 
 ## 💡 Decisiones de diseño destacadas
 
-Estos son puntos que reflejan pensamiento de negocio más allá de un CRUD básico:
+Estos son puntos que reflejan pensamiento de negocio e ingeniería más allá de un CRUD básico:
 
 1. **Crédito disponible real, no solo límite total**: al registrar una venta fiada, el sistema no compara contra el `limite_credito` completo del cliente, sino contra `limite_credito - suma de saldos de créditos no pagados`. Así se evita que un cliente que ya debe $90 de un límite de $100 pueda seguir fiando libremente.
 
 2. **Permisos diferenciados por acción, no por módulo**: en vez de "solo admin puede tocar clientes", se definió permiso por campo sensible (ej. límite de crédito) — pensado específicamente para reducir el riesgo de abuso interno ("metida de mano") sin frenar la operación diaria de un cajero.
 
-3. **Soft delete en vez de DELETE físico**: ningún registro de cliente se borra realmente de la base de datos; se marca como `inactivo`. Esto preserva el historial completo de ventas y créditos para auditoría, incluso después de "eliminar" un cliente.
+3. **Soft delete en vez de DELETE físico** (clientes): ningún registro de cliente se borra realmente de la base de datos; se marca como `inactivo`. Esto preserva el historial completo de ventas y créditos para auditoría, incluso después de "eliminar" un cliente. (La tabla de auditoría, en cambio, sí usa `DELETE` físico para notificaciones descartadas — ahí no hay valor de negocio que preservar.)
 
 4. **`dias_mora` y estados calculados dinámicamente**: en vez de guardar un campo `dias_mora` que requeriría actualizarse constantemente (y podría desincronizarse), se calcula al vuelo en cada consulta comparando fechas. Fuente de verdad única, sin duplicación de datos.
 
-5. **Transacciones de base de datos en operaciones multi-tabla**: registrar una venta implica escribir en `ventas`, `detalle_ventas` y potencialmente `creditos`. Todo ocurre dentro de una transacción Sequelize — si algo falla a mitad de camino, se revierte completo, nunca queda un registro parcial.
+5. **El filtro por estado se aplica después de calcular el estado real**: un bug real detectado durante el desarrollo — filtrar `WHERE estado = 'vencido'` directamente en SQL nunca encontraba resultados, porque `vencido` no es un valor que se guarde en la columna (se calcula). La corrección: traer los créditos relevantes, calcular el estado de cada uno en memoria, y filtrar sobre ese resultado ya calculado.
 
-6. **El total de una venta se calcula en el servidor**: nunca se confía en un total enviado desde el cliente/frontend, para prevenir manipulación de precios desde una petición HTTP directa.
+6. **Transacciones de base de datos en operaciones multi-tabla**: registrar una venta implica escribir en `ventas`, `detalle_ventas` y potencialmente `creditos`. Todo ocurre dentro de una transacción Sequelize — si algo falla a mitad de camino, se revierte completo, nunca queda un registro parcial.
 
-7. **Respuestas simétricas en recuperación de contraseña**: el endpoint de "olvidé mi contraseña" responde exactamente igual exista o no el email en el sistema, evitando que alguien use ese endpoint para enumerar qué correos están registrados.
+7. **El total de una venta se calcula en el servidor**: nunca se confía en un total enviado desde el cliente/frontend, para prevenir manipulación de precios desde una petición HTTP directa.
+
+8. **Respuestas simétricas en recuperación de contraseña**: el endpoint de "olvidé mi contraseña" responde exactamente igual exista o no el email en el sistema, evitando que alguien use ese endpoint para enumerar qué correos están registrados.
+
+9. **Auditoría "best effort", nunca bloqueante**: si el registro de auditoría fallara, la operación principal (crear cliente, venta, pago) igual se completa — un log de auditoría no debe ser un punto único de falla para el negocio. El error solo se imprime en consola del servidor.
+
+10. **`req.formatoOverride` en vez de mutar `req.query`**: otro bug real detectado — en Express, `req.query` se recalcula dinámicamente a partir de la URL cada vez que se lee, así que mutarlo manualmente en un middleware no persiste. Se resolvió usando una propiedad custom del request para casos donde había que forzar un valor internamente.
 
 ---
 
@@ -313,13 +330,19 @@ npm install
 psql -U postgres -c "CREATE DATABASE fiado_digital;"
 
 # Configurar variables de entorno (ver sección siguiente)
-cp .env.example .env
+# crea el archivo .env manualmente con el contenido de más abajo
 
 # Levantar el servidor en modo desarrollo
 npm run dev
 ```
 
 El servidor queda disponible en `http://localhost:5000`. Sequelize sincroniza automáticamente las tablas al iniciar (`sequelize.sync()`).
+
+### Verificar que todo funciona
+```bash
+curl http://localhost:5000
+# → {"mensaje":"API Fiado Digital funcionando correctamente 🚀"}
+```
 
 ---
 
@@ -342,11 +365,13 @@ FRONTEND_URL=http://localhost:5173
 
 > ⚠️ `EMAIL_PASSWORD` debe ser una [contraseña de aplicación de Google](https://myaccount.google.com/apppasswords), no la contraseña normal de la cuenta. Requiere verificación en 2 pasos activada.
 
+> ⚠️ `FRONTEND_URL` se usa tanto para armar los links de verificación de email / recuperación de contraseña, como para configurar el CORS de Socket.io — debe apuntar exactamente a donde corre el frontend.
+
 ---
 
 ## 📌 Estado del proyecto
 
-**Backend: completo (7/7 módulos)**
+**Backend: completo (8/8 módulos)**
 
 - [x] Módulo 1 — Autenticación
 - [x] Módulo 2 — Clientes
@@ -355,19 +380,13 @@ FRONTEND_URL=http://localhost:5173
 - [x] Módulo 5 — Dashboard + Socket.io
 - [x] Módulo 6 — Automatización (Cron Jobs)
 - [x] Módulo 7 — Reportes (PDF/Excel)
-
-**Frontend: en desarrollo**
-
-- [ ] Setup Vue 3 + Vite + Router + Pinia
-- [ ] Login / Registro
-- [ ] Vistas de Clientes, Ventas, Créditos
-- [ ] Dashboard con gráficos y tiempo real
-- [ ] Modo oscuro, tabla avanzada, auditoría
+- [x] Módulo 8 — Auditoría
 
 **Pendiente para producción**
-- [ ] Deploy backend (Render / Railway)
-- [ ] Deploy frontend (Netlify / Vercel)
-- [ ] Deploy base de datos PostgreSQL en la nube
+- [ ] Deploy (Render / Railway)
+- [ ] Base de datos PostgreSQL en la nube
+
+Ver el [README del frontend](../frontend/README.md) para el estado de la interfaz de usuario.
 
 ---
 
