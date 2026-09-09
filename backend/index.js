@@ -8,7 +8,7 @@ const sequelize = require('./config/database');
 require('./models/Usuario');
 require('./models/Cliente');
 require('./models/associations');
-require('./models/associations'); // esto ya carga Auditoria también, no necesitas un require aparte
+// require('./models/associations'); // Eliminado el duplicado
 
 const authRoutes = require('./routes/authRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
@@ -20,7 +20,7 @@ const reporteRoutes = require('./routes/reporteRoutes');
 const auditoriaRoutes = require('./routes/auditoriaRoutes');
 
 const app = express();
-const server = http.createServer(app); // servidor HTTP crudo, para que Socket.io se pueda "montar" sobre él
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
@@ -29,7 +29,7 @@ const io = new Server(server, {
   },
 });
 
-// Middleware para que los controladores puedan acceder a "io" y emitir eventos
+// Middleware para que los controladores puedan acceder a "io"
 app.use((req, res, next) => {
   req.io = io;
   next();
@@ -42,14 +42,15 @@ app.get('/', (req, res) => {
   res.json({ mensaje: 'API Fiado Digital funcionando correctamente 🚀' });
 });
 
-app.use('/auth', authRoutes);
-app.use('/clientes', clienteRoutes);
-app.use('/ventas', ventaRoutes);
-app.use('/creditos', creditoRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/notificaciones', notificacionRoutes);
-app.use('/reportes', reporteRoutes);
-app.use('/auditoria', auditoriaRoutes);
+// 👇 CAMBIO IMPORTANTE: Agregamos "/api" a todas las rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/clientes', clienteRoutes);
+app.use('/api/ventas', ventaRoutes);
+app.use('/api/creditos', creditoRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notificaciones', notificacionRoutes);
+app.use('/api/reportes', reporteRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
 
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado por socket: ${socket.id}`);
@@ -59,7 +60,9 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// 👇 CAMBIO RECOMENDADO: Usamos la variable de entorno o el puerto 3000 por defecto
+// (Ya que tu frontend está configurado para usar el 3000)
+const PORT = process.env.PORT || 3000;
 
 sequelize.sync()
   .then(() => {
