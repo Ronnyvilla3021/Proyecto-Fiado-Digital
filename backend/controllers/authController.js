@@ -31,18 +31,18 @@ const registrar = async (req, res) => {
       token_verificacion: tokenVerificacion,
     });
 
-    // Enviar email de verificación
-    const linkVerificacion = `${process.env.FRONTEND_URL}/verificar-email/${tokenVerificacion}`;
-    await enviarEmail({
-      to: email,
-      subject: 'Verifica tu cuenta - Fiado Digital',
-      html: `
-        <h2>¡Bienvenido a Fiado Digital, ${nombre}!</h2>
-        <p>Por favor confirma tu cuenta haciendo click en el siguiente enlace:</p>
-        <a href="${linkVerificacion}">Verificar mi cuenta</a>
-        <p>Si no creaste esta cuenta, ignora este mensaje.</p>
-      `,
-    });
+    // ✅ COMENTADO: Para que no bloquee la respuesta (no envía correo)
+    // const linkVerificacion = `${process.env.FRONTEND_URL}/verificar-email/${tokenVerificacion}`;
+    // await enviarEmail({
+    //   to: email,
+    //   subject: 'Verifica tu cuenta - Fiado Digital',
+    //   html: `
+    //     <h2>¡Bienvenido a Fiado Digital, ${nombre}!</h2>
+    //     <p>Por favor confirma tu cuenta haciendo click en el siguiente enlace:</p>
+    //     <a href="${linkVerificacion}">Verificar mi cuenta</a>
+    //     <p>Si no creaste esta cuenta, ignora este mensaje.</p>
+    //   `,
+    // });
 
     res.status(201).json({
       mensaje: 'Usuario registrado correctamente. Revisa tu email para verificar tu cuenta.',
@@ -99,9 +99,10 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    if (!usuario.email_verificado) {
-      return res.status(403).json({ error: 'Debes verificar tu email antes de iniciar sesión' });
-    }
+    // ✅ COMENTADO: Para que el login funcione sin verificación de email
+    // if (!usuario.email_verificado) {
+    //   return res.status(403).json({ error: 'Debes verificar tu email antes de iniciar sesión' });
+    // }
 
     const token = jwt.sign(
       { id: usuario.id, rol: usuario.rol },
