@@ -21,18 +21,12 @@ const auditoriaRoutes = require('./routes/auditoriaRoutes');
 const app = express();
 const server = http.createServer(app);
 
-// 🔥 CONFIGURACIÓN DE CORS UNIFICADA (Abre para Vercel y para local)
-const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'];
+// 🔥 CONFIGURACIÓN DE CORS - PERMITE TODO (para desarrollo)
+// En producción, restringe a dominios específicos
 app.use(cors({
-  origin: function (origin, callback) {
-    // Si no hay origin (ej: desde Postman) o está en la lista, permitir
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
+  origin: '*', // Permite todas las origenes (SOLO PARA PRUEBAS)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -56,10 +50,10 @@ app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/reportes', reporteRoutes);
 app.use('/api/auditoria', auditoriaRoutes);
 
-// 🔥 CONFIGURACIÓN DE SOCKET.IO (Debe estar conectado al CORS)
+// 🔥 CONFIGURACIÓN DE SOCKET.IO
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*', // Permite todas las origenes para Socket.IO
     methods: ['GET', 'POST'],
   },
 });
