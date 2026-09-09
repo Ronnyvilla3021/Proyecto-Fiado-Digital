@@ -1,3 +1,10 @@
+## 🌐 Demo en vivo
+
+- **Panel Web**: https://proyecto-fiado-digital.vercel.app
+- **API Backend**: https://proyecto-fiado-digital.onrender.com
+
+> Nota: El backend usa el plan gratuito de Render, así que la primera petición después de inactividad puede tardar unos 30-50 segundos en "despertar" el servidor.
+
 # 🥇 Fiado Digital
 
 Sistema de gestión de créditos ("fiados") para tiendas pequeñas. Digitaliza un proceso que tradicionalmente se lleva en cuadernos o chats de WhatsApp, dando control real sobre ventas, clientes, créditos y pagos, con dashboard en tiempo real, automatización de cobros y auditoría completa.
