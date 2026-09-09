@@ -11,18 +11,18 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
       meta: { publica: true },
     },
-{
-  path: '/registro',
-  name: 'registro',
-  component: () => import('../views/RegistroView.vue'),
-  meta: { publica: true },
-},
-{
-  path: '/verificar-email/:token',
-  name: 'verificar-email',
-  component: () => import('../views/VerificarEmailView.vue'),
-  meta: { publica: true },
-},
+    {
+      path: '/registro',
+      name: 'registro',
+      component: () => import('../views/RegistroView.vue'),
+      meta: { publica: true },
+    },
+    {
+      path: '/verificar-email/:token',
+      name: 'verificar-email',
+      component: () => import('../views/VerificarEmailView.vue'),
+      meta: { publica: true },
+    },
     {
       path: '/',
       component: AppLayout,
@@ -34,10 +34,10 @@ const router = createRouter({
           component: () => import('../views/DashboardView.vue'),
         },
         {
-  path: 'reportes',
-  name: 'reportes',
-  component: () => import('../views/ReportesView.vue'),
-},
+          path: 'reportes',
+          name: 'reportes',
+          component: () => import('../views/ReportesView.vue'),
+        },
         {
           path: 'clientes',
           name: 'clientes',
@@ -54,25 +54,26 @@ const router = createRouter({
           component: () => import('../views/CreditosView.vue'),
         },
         {
-  path: 'auditoria',
-  name: 'auditoria',
-  component: () => import('../views/AuditoriaView.vue'),
-},
+          path: 'auditoria',
+          name: 'auditoria',
+          component: () => import('../views/AuditoriaView.vue'),
+        },
       ],
     },
   ],
 });
 
-router.beforeEach((to, _from, next) => {
+// ✅ CORREGIDO: Sintaxis moderna, retornamos los valores en lugar de usar next()
+router.beforeEach((to) => {
   const authStore = useAuthStore();
   const rutaPublica = to.meta.publica === true;
 
   if (!rutaPublica && !authStore.token) {
-    next({ name: 'login' });
+    return { name: 'login' }; // Equivale a next({ name: 'login' })
   } else if (to.name === 'login' && authStore.token) {
-    next({ name: 'dashboard' });
+    return { name: 'dashboard' }; // Equivale a next({ name: 'dashboard' })
   } else {
-    next();
+    return true; // Equivale a next()
   }
 });
 

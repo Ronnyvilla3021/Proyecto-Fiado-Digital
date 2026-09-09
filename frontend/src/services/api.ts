@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
+// ✅ Lee el puerto desde el archivo .env
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: API_URL, 
 });
 
 // Interceptor: agrega el token automáticamente a TODAS las peticiones salientes
