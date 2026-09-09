@@ -5,8 +5,8 @@
 
 - ## 🔑 Credenciales de prueba
 
-- **Email**: `admin@prueba.com`
-- **Contraseña**: `admin123`
+- **Email**: `admin@nuevo.com`
+- **Contraseña**: `123456`
 
 > Nota: El backend usa el plan gratuito de Render, así que la primera petición después de inactividad puede tardar unos 30-50 segundos en "despertar" el servidor.
 
