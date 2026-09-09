@@ -1,22 +1,22 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-// Si tienes la cadena completa de Neon (DATABASE_URL), úsala. Si no, usa las partes.
 const sequelize = new Sequelize(
-  process.env.DATABASE_URL || process.env.DB_NAME,
-  process.env.DATABASE_URL ? undefined : process.env.DB_USER,
-  process.env.DATABASE_URL ? undefined : process.env.DB_PASSWORD,
+  process.env.DATABASE_URL,
   {
-    host: process.env.DATABASE_URL ? undefined : process.env.DB_HOST,
-    port: process.env.DATABASE_URL ? undefined : process.env.DB_PORT,
     dialect: 'postgres',
     logging: false,
-    // 🔥 IMPORTANTE PARA NEON
     dialectOptions: {
       ssl: {
         require: true,
         rejectUnauthorized: false
       }
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
     }
   }
 );
