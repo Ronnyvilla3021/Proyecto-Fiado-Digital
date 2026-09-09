@@ -3,6 +3,11 @@
 - **Panel Web**: https://proyecto-fiado-digital.vercel.app
 - **API Backend**: https://proyecto-fiado-digital.onrender.com
 
+- ## 🔑 Credenciales de prueba
+
+- **Email**: `admin@prueba.com`
+- **Contraseña**: `admin123`
+
 > Nota: El backend usa el plan gratuito de Render, así que la primera petición después de inactividad puede tardar unos 30-50 segundos en "despertar" el servidor.
 
 # 🥇 Fiado Digital
