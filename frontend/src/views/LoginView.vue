@@ -101,68 +101,141 @@ const manejarLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f0f2f6 0%, #e8ecf1 100%);
-  padding: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  background-image: url('/fondo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(15, 18, 35, 0.78) 0%,
+      rgba(30, 25, 70, 0.72) 45%,
+      rgba(10, 12, 25, 0.85) 100%
+    );
+    backdrop-filter: blur(2px);
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(108, 92, 231, 0.35) 0%,
+      transparent 70%
+    );
+    top: -200px;
+    right: -200px;
+    z-index: 0;
+    pointer-events: none;
+  }
 }
 
 .login-card {
-  background: var(--color-fondo-tarjeta, #ffffff);
-  padding: 2.5rem;
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 400px;
-  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
-  transition: all 0.3s;
+  max-width: 420px;
+  padding: 2.75rem 2.5rem 2.25rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.3s ease;
+  animation: cardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 36px 90px rgba(0, 0, 0, 0.4),
+      0 10px 28px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
 
   &__header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
   }
 
-  /* ESTILO NUEVO PARA LA IMAGEN DEL LOGO */
   &__logo-img {
     width: 100%;
-    max-width: 200px;
+    max-width: 170px;
     height: auto;
     object-fit: contain;
-    margin-bottom: 1.5rem;
+    margin: 0 auto 1.25rem;
+    display: block;
+    filter: drop-shadow(0 6px 16px rgba(108, 92, 231, 0.25));
   }
 
   &__titulo {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--color-texto-primario, #1a1a2e);
-    margin: 0 0 0.25rem;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #1a1a2e;
+    margin: 0 0 0.35rem;
+    line-height: 1.2;
   }
 
   &__subtitulo {
-    color: var(--color-texto-secundario, #6b7280);
-    font-size: 0.9rem;
+    color: #6b7280;
+    font-size: 0.92rem;
     margin: 0;
+    font-weight: 400;
   }
 
   &__footer {
-    margin-top: 1.5rem;
+    margin-top: 1.75rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
   }
 
   &__link {
     text-align: center;
-    font-size: 0.85rem;
-    color: var(--color-texto-secundario, #6b7280);
+    font-size: 0.88rem;
+    color: #6b7280;
     margin: 0;
 
     a {
       color: #6c5ce7;
       text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
+      font-weight: 700;
+      transition: color 0.2s ease, opacity 0.2s ease;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 0;
+        height: 2px;
+        background: #6c5ce7;
+        transition: width 0.25s ease;
+        border-radius: 2px;
+      }
 
       &:hover {
         color: #5a4bd1;
-        text-decoration: underline;
+
+        &::after {
+          width: 100%;
+        }
       }
     }
   }
@@ -171,94 +244,256 @@ const manejarLogin = async () => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.15rem;
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
 
   label {
     font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--color-texto-secundario, #6b7280);
+    font-weight: 700;
+    color: #374151;
+    letter-spacing: 0.01em;
   }
 
   &__input-wrapper {
     display: flex;
     align-items: center;
-    border: 2px solid var(--color-borde, #e5e7eb);
+    border: 1.5px solid #e5e7eb;
     border-radius: 12px;
-    transition: all 0.3s;
-    background: var(--color-fondo-input, #f8fafc);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    background: #f9fafb;
+    overflow: hidden;
+
+    &:hover {
+      border-color: #d1d5db;
+      background: #ffffff;
+    }
 
     &:focus-within {
       border-color: #6c5ce7;
-      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.14);
     }
   }
 
   &__icono {
-    padding: 0 0 0 0.9rem;
-    font-size: 0.9rem;
-    opacity: 0.5;
+    padding: 0 0 0 0.95rem;
+    font-size: 0.95rem;
+    opacity: 0.65;
+    user-select: none;
+    line-height: 1;
   }
 
   input {
     flex: 1;
-    padding: 0.7rem 0.8rem;
+    padding: 0.75rem 0.8rem;
     border: none;
     background: transparent;
     font-size: 0.95rem;
-    color: var(--color-texto-primario, #1a1a2e);
+    color: #1a1a2e;
     outline: none;
     min-width: 0;
+    font-family: inherit;
 
     &::placeholder {
-      color: var(--color-texto-secundario, #9ca3af);
-      opacity: 0.6;
+      color: #9ca3af;
+      opacity: 0.85;
+    }
+
+    &:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+      -webkit-text-fill-color: #1a1a2e;
+      transition: background-color 5000s ease-in-out 0s;
     }
   }
 
   &__toggle {
     background: none;
     border: none;
-    padding: 0 0.9rem;
+    padding: 0 0.95rem;
     cursor: pointer;
-    font-size: 0.9rem;
-    opacity: 0.5;
-    transition: opacity 0.2s;
+    font-size: 0.95rem;
+    opacity: 0.55;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    line-height: 1;
 
     &:hover {
-      opacity: 0.8;
+      opacity: 0.95;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
     }
   }
 }
 
 .mensaje-error {
-  color: #e17055;
-  font-size: 0.85rem;
-  background: rgba(225, 112, 85, 0.1);
-  padding: 0.6rem 0.9rem;
+  color: #dc2626;
+  font-size: 0.86rem;
+  font-weight: 500;
+  background: rgba(220, 38, 38, 0.08);
+  padding: 0.7rem 0.95rem;
   border-radius: 10px;
   margin: 0;
-  border-left: 3px solid #e17055;
+  border-left: 3px solid #dc2626;
+  animation: shake 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  &.btn-primary {
+    background: linear-gradient(135deg, #6c5ce7 0%, #5a4bd1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.35);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(108, 92, 231, 0.45);
+      filter: brightness(1.05);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 6px 14px rgba(108, 92, 231, 0.35);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  &.btn-lg {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.98rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+  }
 }
 
 .spinner {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-page {
+    padding: 1rem;
+    background-attachment: scroll;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem 1.75rem;
+    border-radius: 20px;
+
+    &__logo-img {
+      max-width: 140px;
+    }
+
+    &__titulo {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+/* Modo oscuro — usa el atributo real de la app */
+[data-theme='dark'] {
+  .login-card {
+    background: rgba(26, 26, 46, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    &__titulo {
+      color: #e8e8f0;
+    }
+
+    &__subtitulo,
+    &__link {
+      color: #a0a0b8;
+    }
+
+    &__footer {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .campo {
+    label {
+      color: #d4d4d8;
+    }
+
+    &__input-wrapper {
+      background: #22223b;
+      border-color: rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background: #2a2a44;
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+
+      &:focus-within {
+        background: #2a2a44;
+        border-color: #6c5ce7;
+      }
+    }
+
+    input {
+      color: #e8e8f0;
+
+      &::placeholder {
+        color: #6b6b85;
+      }
+
+      &:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px #22223b inset;
+        -webkit-text-fill-color: #e8e8f0;
+      }
+    }
   }
 }
 </style>

@@ -267,23 +267,26 @@ const reactivarCliente = async (cliente: Cliente) => {
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 1.75rem;
     flex-wrap: wrap;
     gap: 1rem;
   }
 
   &__titulo {
-    font-size: 1.6rem;
+    font-size: 1.75rem;
     font-weight: 800;
     margin: 0;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
+    color: var(--color-texto-primario, #1a1a2e);
+    line-height: 1.2;
   }
 
   &__subtitulo {
     color: var(--color-texto-secundario, #6b7280);
-    margin: 0.2rem 0 0;
+    margin: 0.35rem 0 0;
     font-size: 0.9rem;
+    font-weight: 400;
   }
 
   &__filtros {
@@ -295,35 +298,43 @@ const reactivarCliente = async (cliente: Cliente) => {
   display: flex;
   align-items: center;
   background: var(--color-fondo-tarjeta, #ffffff);
-  border: 2px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  border: 1.5px solid var(--color-borde, #e5e7eb);
   border-radius: 12px;
-  padding: 0 0.9rem;
-  transition: all 0.3s;
-  max-width: 400px;
+  padding: 0 0.95rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  max-width: 420px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  &:hover {
+    border-color: var(--color-borde-fuerte, #d1d5db);
+  }
 
   &:focus-within {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+    border-color: var(--color-primario, #6c5ce7);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.14);
   }
 
   &__icono {
     font-size: 0.9rem;
-    opacity: 0.5;
+    opacity: 0.6;
+    user-select: none;
+    line-height: 1;
   }
 
   &__input {
     flex: 1;
-    padding: 0.7rem 0.8rem;
+    padding: 0.75rem 0.8rem;
     border: none;
     background: transparent;
     font-size: 0.9rem;
     color: var(--color-texto-primario, #1a1a2e);
     outline: none;
     min-width: 0;
+    font-family: inherit;
 
     &::placeholder {
       color: var(--color-texto-secundario, #9ca3af);
-      opacity: 0.6;
+      opacity: 0.75;
     }
   }
 }
@@ -333,33 +344,40 @@ const reactivarCliente = async (cliente: Cliente) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 4rem 2rem;
   color: var(--color-texto-secundario, #6b7280);
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border: 1px dashed var(--color-borde, #e5e7eb);
+  border-radius: 16px;
+  gap: 0.5rem;
 
   &__icono {
     font-size: 3rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.7;
   }
 
   p {
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0;
+    color: var(--color-texto-primario, #374151);
   }
 
   &__sub {
     font-size: 0.85rem;
-    opacity: 0.7;
+    opacity: 0.75;
   }
 }
 
 .spinner {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: 3px solid var(--color-borde, #e5e7eb);
-  border-top-color: #6c5ce7;
+  border-top-color: var(--color-primario, #6c5ce7);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  margin-bottom: 0.5rem;
 }
 
 @keyframes spin {
@@ -370,9 +388,10 @@ const reactivarCliente = async (cliente: Cliente) => {
 
 .table-wrapper {
   background: var(--color-fondo-tarjeta, #ffffff);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .table {
@@ -381,18 +400,26 @@ const reactivarCliente = async (cliente: Cliente) => {
 
   th,
   td {
-    padding: 0.85rem 1.1rem;
+    padding: 0.9rem 1.15rem;
     text-align: left;
     font-size: 0.88rem;
     border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+    color: var(--color-texto-primario, #1a1a2e);
+    vertical-align: middle;
   }
 
   th {
     font-weight: 700;
     color: var(--color-texto-secundario, #6b7280);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
+    background: var(--color-fondo-input, #f9fafb);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background 0.2s ease;
   }
 
   tbody tr:last-child td {
@@ -400,7 +427,7 @@ const reactivarCliente = async (cliente: Cliente) => {
   }
 
   tbody tr:hover {
-    background: rgba(108, 92, 231, 0.04);
+    background: rgba(108, 92, 231, 0.05);
   }
 }
 
@@ -408,40 +435,57 @@ const reactivarCliente = async (cliente: Cliente) => {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #6c5ce7;
+    color: var(--color-primario, #6c5ce7);
   }
 
   &__icono {
     font-size: 0.7rem;
     opacity: 0.6;
-    margin-left: 0.15rem;
+    margin-left: 0.2rem;
+    transition: opacity 0.2s ease;
+
+    .th-ordenable:hover & {
+      opacity: 1;
+    }
   }
 }
 
 .table__acciones {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.35rem;
   justify-content: flex-end;
 }
 
 .badge {
-  display: inline-block;
-  padding: 0.2rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: capitalize;
+  letter-spacing: 0.01em;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
 
   &--activo {
-    background: rgba(0, 184, 148, 0.12);
-    color: #00b894;
+    background: rgba(0, 184, 148, 0.14);
+    color: #059669;
   }
 
   &--inactivo {
-    background: rgba(225, 112, 85, 0.12);
-    color: #e17055;
+    background: rgba(225, 112, 85, 0.14);
+    color: #dc2626;
   }
 }
 
@@ -449,45 +493,154 @@ const reactivarCliente = async (cliente: Cliente) => {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.9rem;
-  padding: 0.25rem 0.4rem;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
   border-radius: 8px;
-  transition: all 0.2s;
+  transition: background 0.2s ease, transform 0.2s ease;
+  line-height: 1;
 
   &:hover {
-    background: var(--color-borde, rgba(0, 0, 0, 0.06));
+    background: var(--color-fondo-input, #f3f4f6);
     transform: scale(1.1);
   }
 
+  &:active {
+    transform: scale(0.95);
+  }
+
   &--danger:hover {
-    background: rgba(225, 112, 85, 0.1);
+    background: rgba(225, 112, 85, 0.14);
   }
 
   &--success:hover {
-    background: rgba(0, 184, 148, 0.1);
+    background: rgba(0, 184, 148, 0.14);
   }
 }
 
 .form-cliente {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
 .nota {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--color-texto-claro, #9ca3af);
   font-style: italic;
   margin: 0;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-fondo-input, #f9fafb);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-alerta, #fdcb6e);
+  color: var(--color-texto-secundario, #6b7280);
 }
 
 .mensaje-error {
-  color: #e17055;
-  font-size: 0.85rem;
-  background: rgba(225, 112, 85, 0.1);
-  padding: 0.6rem 0.9rem;
+  color: #dc2626;
+  font-size: 0.86rem;
+  font-weight: 500;
+  background: rgba(220, 38, 38, 0.08);
+  padding: 0.7rem 0.95rem;
   border-radius: 10px;
   margin: 0;
-  border-left: 3px solid #e17055;
+  border-left: 3px solid #dc2626;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .table-wrapper {
+    overflow-x: auto;
+
+    .table {
+      min-width: 720px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .clientes-view {
+    &__titulo {
+      font-size: 1.45rem;
+    }
+
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .campo-busqueda {
+    max-width: 100%;
+  }
+}
+
+/* Modo oscuro — usa el atributo real de la app */
+[data-theme='dark'] {
+  .campo-busqueda {
+    background: var(--color-fondo-tarjeta);
+    border-color: var(--color-borde);
+
+    &:hover {
+      border-color: var(--color-borde-fuerte);
+    }
+
+    &:focus-within {
+      border-color: var(--color-primario);
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
+    }
+
+    &__input {
+      color: var(--color-texto-primario);
+
+      &::placeholder {
+        color: var(--color-texto-claro);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .table {
+    th {
+      background: var(--color-fondo-input);
+      color: var(--color-texto-secundario);
+    }
+
+    td {
+      color: var(--color-texto-primario);
+    }
+
+    tbody tr:hover {
+      background: rgba(108, 92, 231, 0.08);
+    }
+  }
+
+  .estado-info {
+    background: var(--color-fondo-tarjeta);
+    border-color: var(--color-borde);
+
+    p { color: var(--color-texto-secundario); }
+  }
+
+  .btn-icon {
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  .nota {
+    background: var(--color-fondo-input);
+    color: var(--color-texto-secundario);
+  }
 }
 </style>

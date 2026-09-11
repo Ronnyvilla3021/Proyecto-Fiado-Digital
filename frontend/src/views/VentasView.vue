@@ -259,23 +259,26 @@ const guardarVenta = async () => {
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 1.75rem;
     flex-wrap: wrap;
     gap: 1rem;
   }
 
   &__titulo {
-    font-size: 1.6rem;
+    font-size: 1.75rem;
     font-weight: 800;
     margin: 0;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
+    color: var(--color-texto-primario, #1a1a2e);
+    line-height: 1.2;
   }
 
   &__subtitulo {
     color: var(--color-texto-secundario, #6b7280);
-    margin: 0.2rem 0 0;
+    margin: 0.35rem 0 0;
     font-size: 0.9rem;
+    font-weight: 400;
   }
 }
 
@@ -284,33 +287,39 @@ const guardarVenta = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 4rem 2rem;
   color: var(--color-texto-secundario, #6b7280);
+  background: var(--color-fondo-tarjeta, #ffffff);
+  border: 1px dashed var(--color-borde, #e5e7eb);
+  border-radius: 16px;
+  gap: 0.5rem;
 
   &__icono {
     font-size: 3rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.7;
   }
 
   p {
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0;
+    color: var(--color-texto-primario, #374151);
   }
 
   &__sub {
     font-size: 0.85rem;
-    opacity: 0.7;
+    opacity: 0.75;
   }
 }
 
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
@@ -321,9 +330,10 @@ const guardarVenta = async () => {
 
 .table-wrapper {
   background: var(--color-fondo-tarjeta, #ffffff);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .table {
@@ -332,18 +342,26 @@ const guardarVenta = async () => {
 
   th,
   td {
-    padding: 0.85rem 1.1rem;
+    padding: 0.9rem 1.15rem;
     text-align: left;
     font-size: 0.88rem;
     border-bottom: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
+    color: var(--color-texto-primario, #1a1a2e);
+    vertical-align: middle;
   }
 
   th {
     font-weight: 700;
     color: var(--color-texto-secundario, #6b7280);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
+    background: var(--color-fondo-input, #f9fafb);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background 0.2s ease;
   }
 
   tbody tr:last-child td {
@@ -351,7 +369,7 @@ const guardarVenta = async () => {
   }
 
   tbody tr:hover {
-    background: rgba(108, 92, 231, 0.04);
+    background: rgba(108, 92, 231, 0.05);
   }
 }
 
@@ -359,34 +377,51 @@ const guardarVenta = async () => {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #6c5ce7;
+    color: var(--color-primario, #6c5ce7);
   }
 
   &__icono {
     font-size: 0.7rem;
     opacity: 0.6;
-    margin-left: 0.15rem;
+    margin-left: 0.2rem;
+    transition: opacity 0.2s ease;
+
+    .th-ordenable:hover & {
+      opacity: 1;
+    }
   }
 }
 
 .badge {
-  display: inline-block;
-  padding: 0.2rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: capitalize;
+  letter-spacing: 0.01em;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
 
   &--contado {
-    background: rgba(9, 132, 227, 0.12);
-    color: #0984e3;
+    background: rgba(9, 132, 227, 0.14);
+    color: #0369a1;
   }
 
   &--fiado {
-    background: rgba(253, 203, 110, 0.25);
-    color: #e17055;
+    background: rgba(253, 203, 110, 0.22);
+    color: #b45309;
   }
 }
 
@@ -398,45 +433,53 @@ const guardarVenta = async () => {
 
 .opciones-pago {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .opcion-pago {
   flex: 1;
-  padding: 0.6rem;
-  border: 2px solid var(--color-borde, #e5e7eb);
-  background: var(--color-fondo-input, #f8fafc);
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--color-borde, #e5e7eb);
+  background: var(--color-fondo-input, #f9fafb);
   color: var(--color-texto-primario, #1a1a2e);
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.3s;
+  font-family: inherit;
+  transition: border-color 0.25s ease, background 0.25s ease,
+    color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
 
-  &:hover {
-    border-color: var(--color-texto-secundario);
+  &:hover:not(&--activa) {
+    border-color: var(--color-primario, #6c5ce7);
+    color: var(--color-primario, #6c5ce7);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   &--activa {
-    border-color: #6c5ce7;
+    border-color: var(--color-primario, #6c5ce7);
     background: rgba(108, 92, 231, 0.08);
-    color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    color: var(--color-primario, #6c5ce7);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.14);
   }
 }
 
 .separador {
   border: none;
-  border-top: 1px solid var(--color-borde, rgba(0, 0, 0, 0.06));
-  margin: 0.25rem 0;
+  border-top: 1px dashed var(--color-borde, rgba(0, 0, 0, 0.08));
+  margin: 0.5rem 0;
 }
 
 .item-fila {
   display: grid;
-  grid-template-columns: 1fr 60px 80px 70px 28px;
-  gap: 0.4rem;
+  grid-template-columns: 1fr 64px 90px 76px 30px;
+  gap: 0.5rem;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
 
   &__descripcion {
     min-width: 0;
@@ -445,28 +488,39 @@ const guardarVenta = async () => {
   &__numero {
     min-width: 0;
     text-align: center;
+    font-variant-numeric: tabular-nums;
   }
 
   &__subtotal {
-    font-size: 0.82rem;
-    font-weight: 600;
+    font-size: 0.84rem;
+    font-weight: 700;
     text-align: right;
-    color: var(--color-texto-primario, #1a1a2e);
+    color: var(--color-primario, #6c5ce7);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   &__quitar {
     background: none;
     border: none;
-    color: #e17055;
+    color: #dc2626;
     cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0.2rem;
+    font-size: 0.95rem;
+    padding: 0.3rem;
     border-radius: 6px;
-    transition: all 0.2s;
+    transition: background 0.2s ease, transform 0.2s ease;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover:not(:disabled) {
-      background: rgba(225, 112, 85, 0.1);
-      transform: scale(1.2);
+      background: rgba(220, 38, 38, 0.12);
+      transform: scale(1.15);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
     }
 
     &:disabled {
@@ -476,29 +530,172 @@ const guardarVenta = async () => {
   }
 }
 
+/* Inputs dentro del modal — override específico */
+.form-venta {
+  .form-control {
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.86rem;
+    border-width: 1.5px;
+  }
+}
+
 .total-venta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  background: var(--color-fondo-input, #f8fafc);
-  border-radius: 10px;
-  font-size: 1rem;
-  border: 1px solid var(--color-borde, rgba(0, 0, 0, 0.04));
+  padding: 0.9rem 1.15rem;
+  background: linear-gradient(
+    135deg,
+    rgba(108, 92, 231, 0.08),
+    rgba(162, 155, 254, 0.05)
+  );
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid rgba(108, 92, 231, 0.18);
+  color: var(--color-texto-secundario, #6b7280);
 
   strong {
-    font-size: 1.2rem;
-    color: #6c5ce7;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-primario, #6c5ce7);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 }
 
 .mensaje-error {
-  color: #e17055;
-  font-size: 0.85rem;
-  background: rgba(225, 112, 85, 0.1);
-  padding: 0.6rem 0.9rem;
+  color: #dc2626;
+  font-size: 0.86rem;
+  font-weight: 500;
+  background: rgba(220, 38, 38, 0.08);
+  padding: 0.7rem 0.95rem;
   border-radius: 10px;
   margin: 0;
-  border-left: 3px solid #e17055;
+  border-left: 3px solid #dc2626;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .table-wrapper {
+    overflow-x: auto;
+
+    .table {
+      min-width: 680px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .ventas-view {
+    &__titulo {
+      font-size: 1.45rem;
+    }
+
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .item-fila {
+    grid-template-columns: 1fr 60px 80px 30px;
+    grid-template-areas:
+      'desc desc desc desc'
+      'cant precio subtotal quitar';
+    gap: 0.4rem;
+
+    &__descripcion { grid-area: desc; }
+    &__numero:nth-of-type(1) { grid-area: cant; }
+    &__numero:nth-of-type(2) { grid-area: precio; }
+    &__subtotal { grid-area: subtotal; }
+    &__quitar { grid-area: quitar; }
+  }
+
+  .total-venta {
+    strong {
+      font-size: 1.15rem;
+    }
+  }
+}
+
+/* Modo oscuro — usa el atributo real de la app */
+[data-theme='dark'] {
+  .table {
+    th {
+      background: var(--color-fondo-input);
+      color: var(--color-texto-secundario);
+    }
+
+    td {
+      color: var(--color-texto-primario);
+    }
+
+    tbody tr:hover {
+      background: rgba(108, 92, 231, 0.08);
+    }
+  }
+
+  .estado-info {
+    background: var(--color-fondo-tarjeta);
+    border-color: var(--color-borde);
+
+    p { color: var(--color-texto-secundario); }
+  }
+
+  .opcion-pago {
+    background: var(--color-fondo-input);
+    border-color: var(--color-borde);
+    color: var(--color-texto-primario);
+
+    &:hover:not(&--activa) {
+      border-color: var(--color-primario);
+      color: var(--color-primario);
+    }
+
+    &--activa {
+      border-color: var(--color-primario);
+      background: rgba(108, 92, 231, 0.18);
+      color: #a29bfe;
+    }
+  }
+
+  .item-fila {
+    &__subtotal {
+      color: #a29bfe;
+    }
+
+    &__quitar {
+      &:hover:not(:disabled) {
+        background: rgba(220, 38, 38, 0.2);
+      }
+    }
+  }
+
+  .total-venta {
+    background: linear-gradient(
+      135deg,
+      rgba(108, 92, 231, 0.18),
+      rgba(162, 155, 254, 0.1)
+    );
+    border-color: rgba(108, 92, 231, 0.35);
+    color: var(--color-texto-secundario);
+
+    strong {
+      color: #a29bfe;
+    }
+  }
 }
 </style>
